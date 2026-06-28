@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 Canada Day Beerolympics — Beer Pong Bracket</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+  :root { --red:#CC0000; --white:#FFFFFF; --dark:#111; --bl:#e87070; --bd:#c04040; --gold:#ffd700; }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:100%;height:100%;overflow:hidden;background:#000}
+  body{font-family:'Press Start 2P',monospace}
+
+  .stage{position:absolute;width:1920px;height:1080px;transform-origin:top left;overflow:hidden;background:var(--white);}
+
+  .border-outer{position:absolute;inset:0;border:28px solid var(--red);pointer-events:none;z-index:50}
+  .border-inner{position:absolute;inset:28px;border:8px solid var(--dark);pointer-events:none;z-index:50}
+
+  .ground-wrap{position:absolute;bottom:0;left:0;width:100%;height:80px;z-index:20}
+  .brick-strip{width:100%;height:100%;background:repeating-linear-gradient(90deg,var(--bl) 0,var(--bl) 48px,var(--bd) 48px,var(--bd) 50px);position:relative;overflow:hidden}
+  .brick-strip::before{content:'';position:absolute;top:0;left:0;width:100%;height:50%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.12) 0,rgba(255,255,255,.12) 48px,transparent 48px,transparent 50px)}
+  .brick-strip::after{content:'';position:absolute;top:50%;left:24px;width:calc(100% - 24px);height:50%;background:repeating-linear-gradient(90deg,rgba(255,255,255,.08) 0,rgba(255,255,255,.08) 48px,transparent 48px,transparent 50px)}
+
+  .canoe-runner{position:absolute;bottom:72px;left:-500px;z-index:30;animation:run 16s linear infinite;}
+  .canoe-runner img{height:165px;width:auto;display:block;image-rendering:pixelated;}
+  @keyframes run{from{left:-500px}to{left:110%}}
+
+  .layout{
+    position:absolute;
+    top:44px;left:44px;right:44px;bottom:80px;
+    z-index:10;
+    display:flex;
+    flex-direction:column;
+    padding:16px 16px 8px;
+  }
+
+  .title-row{text-align:center;margin-bottom:14px;flex-shrink:0}
+  .title-row h1{font-size:36px;color:var(--red);text-shadow:3px 3px 0 var(--dark);letter-spacing:2px;line-height:1.2}
+
+  /* bracket: 4 round cols + 3 connector cols */
+  .bracket{
+    flex:1;
+    display:grid;
+    grid-template-columns: 1fr 60px 1fr 60px 1fr 60px 1fr;
+    grid-template-rows: 24px 1fr;
+    min-height:0;
+  }
+
+  .rh{font-size:11px;color:var(--red);text-align:center;letter-spacing:2px;align-self:center;}
+
+  .rcol{display:flex;flex-direction:column;justify-content:space-around;height:100%;padding:4px 0;gap:6px;min-height:0}
+
+  .conn{position:relative;}
+  .conn svg{position:absolute;top:0;left:0;width:100%;height:100%;overflow:visible;}
+
+  /* R1 matchup block */
+  .matchup{display:flex;flex-direction:column;flex:1;border:4px solid var(--dark);overflow:hidden;min-height:0;}
+  .team-slot{flex:1;display:flex;align-items:center;padding:0 10px;gap:8px;min-height:0;}
+  .team-slot.t-white{background:var(--white);}
+  .team-slot.t-red{background:var(--red);}
+  .team-slot+.team-slot{border-top:3px solid var(--dark);}
+  .team-lbl{font-size:9px;min-width:52px;flex-shrink:0;letter-spacing:0;}
+  .t-white .team-lbl{color:rgba(0,0,0,0.4);}
+  .t-red   .team-lbl{color:rgba(255,255,255,0.6);}
+  .team-names{font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;}
+  .t-white .team-names{color:var(--dark);}
+  .t-red   .team-names{color:var(--white);}
+
+  /* Winner cards QF/SF */
+  .winner-card{flex:1;border:4px solid var(--dark);display:flex;flex-direction:column;justify-content:center;padding:10px 12px;min-height:0;}
+  .winner-card.w-red{background:var(--red);}
+  .winner-card.w-white{background:var(--white);}
+  .winner-card.w-tbd{background:#f0f0f0;}
+  .wc-label{font-size:8px;letter-spacing:1px;margin-bottom:6px;}
+  .w-red   .wc-label{color:rgba(255,255,255,0.55);}
+  .w-white .wc-label{color:rgba(0,0,0,0.35);}
+  .w-tbd   .wc-label{color:rgba(0,0,0,0.25);}
+  .wc-name{font-size:13px;line-height:1.8;}
+  .w-red   .wc-name{color:var(--white);}
+  .w-white .wc-name{color:var(--dark);}
+  .w-tbd   .wc-name{color:rgba(0,0,0,0.3);}
+
+  /* Champion */
+  .champ-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-height:0;}
+  .champ-card{width:100%;border:5px solid var(--dark);background:var(--gold);padding:14px 16px;box-shadow:5px 5px 0 rgba(0,0,0,0.35);text-align:center;}
+  .champ-label{font-size:11px;color:rgba(0,0,0,0.5);margin-bottom:10px;letter-spacing:2px;}
+  .champ-name{font-size:16px;color:var(--dark);line-height:1.8;}
+  .champ-tbd{font-size:14px;color:rgba(0,0,0,0.3);}
+
+  .status-bar{position:absolute;bottom:86px;right:52px;font-size:10px;letter-spacing:1px;color:rgba(0,0,0,0.3);z-index:40}
+  .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#44cc44;margin-right:5px;vertical-align:middle;animation:pulse 2s infinite}
+  .dot.fetching{background:#ffaa00;animation:none}
+  .dot.error{background:#ff4444;animation:none}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="border-outer"></div>
+  <div class="border-inner"></div>
+  <div class="ground-wrap"><div class="brick-strip"></div></div>
+  <div class="canoe-runner"><img src="Canoe.png" alt="canoe"></div>
+  <div class="status-bar"><span class="dot" id="statusDot"></span><span id="statusText">Loading...</span></div>
+
+  <div class="layout">
+    <div class="title-row">
+      <h1>🍺 2026 CANADA DAY BEEROLYMPICS — BEER PONG BRACKET 🍺</h1>
+    </div>
+
+    <div class="bracket">
+      <div class="rh">ROUND 1</div>
+      <div></div>
+      <div class="rh">QUARTERFINALS</div>
+      <div></div>
+      <div class="rh">SEMIFINALS</div>
+      <div></div>
+      <div class="rh">🏆 CHAMPION</div>
+
+      <div class="rcol" id="r1col"></div>
+      <div class="conn" id="conn1"><svg id="svg1"></svg></div>
+      <div class="rcol" id="r2col"></div>
+      <div class="conn" id="conn2"><svg id="svg2"></svg></div>
+      <div class="rcol" id="r3col"></div>
+      <div class="conn" id="conn3"><svg id="svg3"></svg></div>
+      <div class="rcol" id="r4col"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── SCALE ──
+function scaleStage() {
+  const s = document.getElementById('stage');
+  const W = 1920, H = 1080;
+  const sc = Math.min(window.innerWidth / W, window.innerHeight / H);
+  s.style.width  = W + 'px';
+  s.style.height = H + 'px';
+  s.style.transform = 'scale(' + sc + ')';
+  s.style.left = ((window.innerWidth  - W * sc) / 2) + 'px';
+  s.style.top  = ((window.innerHeight - H * sc) / 2) + 'px';
+}
+scaleStage();
+window.addEventListener('resize', scaleStage);
+
+const API_URL    = 'https://script.google.com/macros/s/AKfycbzprLfwc4BJmYeu5U0vWdyu4xKVOTztibpGEqD9wShmVA1SthYsLCJC2kQOh1MyZ1B0/exec';
+const REFRESH_MS = 30000;
+
+function setStatus(state, text) {
+  document.getElementById('statusDot').className = 'dot' + (state !== 'ok' ? ' ' + state : '');
+  document.getElementById('statusText').textContent = text;
+}
+
+function clean(v) {
+  const s = String(v || '').trim();
+  return (s === '' || s === 'undefined' || s === 'null') ? '' : s;
+}
+
+function isRedTeam(label) {
+  const m = clean(label).match(/(\d+)/);
+  return m ? (parseInt(m[1]) >= 5) : false;
+}
+
+// ── BUILD R1 MATCHUP ──
+function makeMatchup(teamA, teamB) {
+  const wrap = document.createElement('div');
+  wrap.className = 'matchup';
+  [teamA, teamB].forEach(function(t) {
+    const slot = document.createElement('div');
+    slot.className = 'team-slot ' + (isRedTeam(t.label) ? 't-red' : 't-white');
+    const lbl = document.createElement('span');
+    lbl.className = 'team-lbl';
+    lbl.textContent = clean(t.label).toUpperCase();
+    const names = document.createElement('span');
+    names.className = 'team-names';
+    var p1 = clean(t.p1), p2 = clean(t.p2);
+    names.textContent = [p1, p2].filter(Boolean).join(' & ').toUpperCase() || 'TBD';
+    slot.appendChild(lbl);
+    slot.appendChild(names);
+    wrap.appendChild(slot);
+  });
+  return wrap;
+}
+
+// ── BUILD WINNER CARD (QF / SF) ──
+function makeWinnerCard(m) {
+  const card = document.createElement('div');
+  var p1 = clean(m.p1), p2 = clean(m.p2), lbl = clean(m.label);
+  var hasWinner = p1 !== '';
+  var red = hasWinner && isRedTeam(lbl);
+  card.className = 'winner-card ' + (hasWinner ? (red ? 'w-red' : 'w-white') : 'w-tbd');
+
+  const labelEl = document.createElement('div');
+  labelEl.className = 'wc-label';
+  labelEl.textContent = lbl.toUpperCase() || '—';
+  card.appendChild(labelEl);
+
+  if (hasWinner) {
+    [p1, p2].filter(Boolean).forEach(function(name) {
+      const el = document.createElement('div');
+      el.className = 'wc-name';
+      el.textContent = name.toUpperCase();
+      card.appendChild(el);
+    });
+  } else {
+    const el = document.createElement('div');
+    el.className = 'wc-name';
+    el.textContent = 'TBD';
+    card.appendChild(el);
+  }
+  return card;
+}
+
+// ── BUILD CHAMPION ──
+function makeChampion(m) {
+  const wrap = document.createElement('div');
+  wrap.className = 'champ-wrap';
+  const card = document.createElement('div');
+  card.className = 'champ-card';
+
+  var p1 = m ? clean(m.p1) : '';
+  var p2 = m ? clean(m.p2) : '';
+  var hasChamp = p1 !== '';
+
+  const lbl = document.createElement('div');
+  lbl.className = 'champ-label';
+  lbl.textContent = '🏆 CHAMPION 🏆';
+  card.appendChild(lbl);
+
+  if (hasChamp) {
+    [p1, p2].filter(Boolean).forEach(function(name) {
+      const el = document.createElement('div');
+      el.className = 'champ-name';
+      el.textContent = name.toUpperCase();
+      card.appendChild(el);
+    });
+  } else {
+    const el = document.createElement('div');
+    el.className = 'champ-tbd';
+    el.textContent = 'TBD';
+    card.appendChild(el);
+  }
+
+  wrap.appendChild(card);
+  return wrap;
+}
+
+// ── SVG LINE HELPERS ──
+function svgPath(svg, d) {
+  var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', d);
+  path.setAttribute('stroke', '#CC0000');
+  path.setAttribute('stroke-width', '3');
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke-dasharray', '8,5');
+  svg.appendChild(path);
+}
+
+function midY(el, connTop, sc) {
+  var r = el.getBoundingClientRect();
+  return (r.top + r.height / 2 - connTop) / sc;
+}
+
+// ── DRAW CONNECTORS ──
+function drawAllConnectors(r1matchups, r2cards, r3cards, champCard) {
+  var sc = parseFloat(
+    document.getElementById('stage').style.transform.replace('scale(', '').replace(')', '')
+  ) || 1;
+
+  // R1 → R2: straight horizontal lines, one per matchup
+  (function() {
+    var svg  = document.getElementById('svg1');
+    var conn = document.getElementById('conn1');
+    svg.innerHTML = '';
+    var cRect = conn.getBoundingClientRect();
+    var W = cRect.width / sc;
+    r1matchups.forEach(function(mu, i) {
+      var card = r2cards[i];
+      if (!mu || !card) return;
+      var y1 = midY(mu,   cRect.top, sc);
+      var y2 = midY(card, cRect.top, sc);
+      svgPath(svg, 'M 0 ' + y1 + ' L ' + W + ' ' + y2);
+    });
+  })();
+
+  // R2 → R3: bracket elbow (pairs merge)
+  (function() {
+    var svg  = document.getElementById('svg2');
+    var conn = document.getElementById('conn2');
+    svg.innerHTML = '';
+    var cRect = conn.getBoundingClientRect();
+    var W = cRect.width / sc;
+    var xM = W / 2;
+    for (var i = 0; i < r2cards.length; i += 2) {
+      var elA  = r2cards[i];
+      var elB  = r2cards[i + 1];
+      var elTo = r3cards[Math.floor(i / 2)];
+      if (!elA || !elTo) continue;
+      var yA   = midY(elA,  cRect.top, sc);
+      var yB   = elB ? midY(elB, cRect.top, sc) : yA;
+      var yMid = (yA + yB) / 2;
+      var yT   = midY(elTo, cRect.top, sc);
+      // A: go right to midX, drop/rise to midY
+      svgPath(svg, 'M 0 ' + yA + ' L ' + xM + ' ' + yA + ' L ' + xM + ' ' + yMid);
+      // B: same
+      if (elB) svgPath(svg, 'M 0 ' + yB + ' L ' + xM + ' ' + yB + ' L ' + xM + ' ' + yMid);
+      // midY → target
+      svgPath(svg, 'M ' + xM + ' ' + yMid + ' L ' + W + ' ' + yT);
+    }
+  })();
+
+  // R3 → Champion: bracket elbow (pair merges)
+  (function() {
+    var svg  = document.getElementById('svg3');
+    var conn = document.getElementById('conn3');
+    svg.innerHTML = '';
+    if (!champCard) return;
+    var cRect = conn.getBoundingClientRect();
+    var W = cRect.width / sc;
+    var xM = W / 2;
+    var elA  = r3cards[0];
+    var elB  = r3cards[1];
+    var yA   = elA ? midY(elA, cRect.top, sc) : 0;
+    var yB   = elB ? midY(elB, cRect.top, sc) : yA;
+    var yMid = (yA + yB) / 2;
+    var yT   = midY(champCard, cRect.top, sc);
+    if (elA) svgPath(svg, 'M 0 ' + yA + ' L ' + xM + ' ' + yA + ' L ' + xM + ' ' + yMid);
+    if (elB) svgPath(svg, 'M 0 ' + yB + ' L ' + xM + ' ' + yB + ' L ' + xM + ' ' + yMid);
+    svgPath(svg, 'M ' + xM + ' ' + yMid + ' L ' + W + ' ' + yT);
+  })();
+}
+
+// ── RENDER BRACKET ──
+function renderBracket(b) {
+  var r1col = document.getElementById('r1col');
+  var r2col = document.getElementById('r2col');
+  var r3col = document.getElementById('r3col');
+  var r4col = document.getElementById('r4col');
+  r1col.innerHTML = '';
+  r2col.innerHTML = '';
+  r3col.innerHTML = '';
+  r4col.innerHTML = '';
+
+  // R1: pair teams 0+1, 2+3, 4+5, 6+7
+  var r1matchups = [];
+  for (var i = 0; i < b.r1.length; i += 2) {
+    var mu = makeMatchup(b.r1[i], b.r1[i+1] || { label:'', p1:'', p2:'' });
+    r1col.appendChild(mu);
+    r1matchups.push(mu);
+  }
+
+  // R2
+  var r2cards = [];
+  b.r2.forEach(function(m) {
+    var c = makeWinnerCard(m);
+    r2col.appendChild(c);
+    r2cards.push(c);
+  });
+
+  // R3
+  var r3cards = [];
+  b.r3.forEach(function(m) {
+    var c = makeWinnerCard(m);
+    r3col.appendChild(c);
+    r3cards.push(c);
+  });
+
+  // Champion
+  var champWrap = makeChampion(b.r4 ? b.r4[0] : null);
+  r4col.appendChild(champWrap);
+  var champCard = champWrap.querySelector('.champ-card');
+
+  // Draw connectors after paint
+  requestAnimationFrame(function() {
+    requestAnimationFrame(function() {
+      drawAllConnectors(r1matchups, r2cards, r3cards, champCard);
+    });
+  });
+}
+
+// ── FETCH ──
+async function refresh() {
+  setStatus('fetching', 'Refreshing...');
+  try {
+    var res = await fetch(API_URL, { redirect: 'follow' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    var data = await res.json();
+    if (!data.bracket) throw new Error('No bracket data — redeploy Apps Script');
+    renderBracket(data.bracket);
+    var t = new Date().toLocaleTimeString('en-CA', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+    setStatus('ok', 'Live · Updated ' + t);
+  } catch(err) {
+    console.error(err);
+    setStatus('error', err.message.substring(0, 70));
+  }
+}
+
+refresh();
+setInterval(refresh, REFRESH_MS);
+</script>
+</body>
+</html>
