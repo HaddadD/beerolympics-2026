@@ -381,7 +381,7 @@ function renderBracket(b) {
 async function refresh() {
   setStatus('fetching', 'Refreshing...');
   try {
-    var res = await fetch(API_URL, { redirect: 'follow' });
+    var res = await fetch(API_URL + '?t=' + Date.now(), { redirect: 'follow' });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     var data = await res.json();
     if (!data.bracket) throw new Error('No bracket data — redeploy Apps Script');
