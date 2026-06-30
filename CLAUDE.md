@@ -51,8 +51,11 @@ If scores need to change, edit the **Google Sheet / Apps Script**, not this repo
 ## Leaderboard logic
 
 - **Two boards:** the Red team and White team each have their own board, sorted by
-  score descending and ranked independently. Ranks use *competition ranking* (equal
-  scores share a rank, e.g. `1, 1, 3`); the top 3 ranks get gold/silver/bronze accents.
+  score descending and ranked independently. Ranks use **dense ranking** (equal scores
+  share a rank, distinct scores step by 1 with no gaps, e.g. `1, 1, 2`) — chosen over
+  competition ranking so the numbers never appear to "skip". The same dense logic is
+  used in `syncRows` and `snapshot` so they stay consistent. Top 3 ranks get
+  gold/silver/bronze accents.
 - **Who's winning:** a colored banner ("RED TEAM LEADS BY N PTS" / "DEAD HEAT — TEAMS
   TIED AT N") plus a crown 👑, gold glow, and "LEADING" tag on the leading team's board.
 - **Dynamic page theme:** the whole page re-themes to follow the leader — `theme-red`
@@ -65,6 +68,20 @@ If scores need to change, edit the **Google Sheet / Apps Script**, not this repo
 - **Ties are first-class:** if multiple players tie for a team's top score, that team's
   MVP strip shows an obvious `⚔️ N-WAY TIE` and lists everyone; each tied player gets
   the trophy and an `⭐ MVP · TIE` badge.
+
+## Animations
+
+The board is built to animate between refreshes, so rows must keep a stable identity
+across renders. `syncRows` therefore does a **keyed reconcile** (one persistent DOM row
+per player name, kept in `container._rows`) instead of rebuilding `innerHTML`, and uses
+the **FLIP** technique (measure First positions → reorder DOM → measure Last → play an
+inverse `el.animate` transform) so rows slide to their new rank when the order changes.
+On top of that: team totals and player scores **count up**, a row **flashes** green/red
+when a score changes (with a score "bump"), a floating **▲/▼ rank-delta** badge appears
+when a player moves, the MVP strip **pops** when the MVP changes, the lead banner pops
+when the lead changes hands, and the theme cross-fades. Idle flourishes: bobbing crown,
+pulsing trophies + LEADING tag + winning-board ring, and a gently bobbing canoe. All
+motion is gated behind `prefers-reduced-motion`.
 
 ## Full-screen ad (deer.supply)
 
