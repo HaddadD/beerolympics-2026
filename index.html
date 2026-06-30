@@ -79,7 +79,11 @@
   .fsbtn{position:absolute;top:0;right:0;display:flex;align-items:center;justify-content:center;width:clamp(34px,3vw,44px);height:clamp(34px,3vw,44px);font-family:inherit;font-size:clamp(13px,1.3vw,18px);line-height:1;cursor:pointer;color:var(--white);background:var(--red);border:3px solid var(--dark);box-shadow:3px 3px 0 rgba(0,0,0,.3)}
   .fsbtn:hover{background:var(--red-d)}
   .fsbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(0,0,0,.3)}
-  .status{font-size:clamp(7px,.8vw,10px);letter-spacing:1px;color:var(--muted);white-space:nowrap}
+  /* status rides on the water at the bottom of the scene (drawn before the canoe,
+     so the boat sails over it); no z-index → relies on DOM order to stay under the boat */
+  .status{position:absolute;left:50%;transform:translateX(-50%);bottom:clamp(22px,3vh,36px);
+    font-size:clamp(7px,.85vw,11px);letter-spacing:1px;white-space:nowrap;
+    color:var(--white);text-shadow:1px 1px 0 rgba(0,0,0,.6),-1px -1px 0 rgba(0,0,0,.35)}
   .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#44cc44;margin-right:6px;vertical-align:middle;animation:pulse 2s infinite}
   .dot.fetching{background:#ffaa00;animation:none}
   .dot.error{background:#ff4444;animation:none}
@@ -109,6 +113,8 @@
   .board-top .crown-r{right:clamp(10px,2vw,28px)}
   .board.is-leading .board-top .crown{display:block}
   .bt-name{font-size:clamp(12px,1.6vw,22px);letter-spacing:2px}
+  .bt-figure{display:flex;flex-direction:column;align-items:center}
+  .bt-labels{display:flex;flex-direction:column;align-items:center}
   .bt-total{font-size:clamp(34px,5vw,68px);line-height:1;text-shadow:3px 3px 0 rgba(0,0,0,.35)}
   .bt-pts{font-size:clamp(7px,.8vw,10px);letter-spacing:3px;opacity:.8;margin-top:-4px}
   .bt-meta{font-size:clamp(7px,.85vw,11px);opacity:.85;letter-spacing:1px;margin-top:4px}
@@ -167,16 +173,19 @@
   body.is-fullscreen .leadbar{flex-shrink:0;padding:clamp(6px,1vh,12px) 14px;font-size:clamp(10px,1.3vw,18px)}
   body.is-fullscreen .boards{flex:1;min-height:0}
   body.is-fullscreen .board{overflow:hidden}
-  /* fullscreen header = horizontal scoreboard band: NAME on top, then a big total
-     flanked by the meta inline — uses the wide whitespace, lets the number breathe */
-  body.is-fullscreen .board-top{flex-flow:row wrap;align-items:center;justify-content:center;
-    column-gap:clamp(8px,1.1vw,22px);row-gap:0;padding:clamp(6px,.9vw,16px) clamp(44px,5vw,84px)}
-  body.is-fullscreen .bt-name{flex-basis:100%;text-align:center;order:0;font-size:clamp(13px,1.5vw,24px);letter-spacing:2px}
-  body.is-fullscreen .bt-total{order:1;font-size:clamp(34px,4.2vw,72px);line-height:.95;text-shadow:3px 3px 0 rgba(0,0,0,.35)}
-  body.is-fullscreen .bt-pts{order:2;font-size:clamp(6px,.7vw,10px);margin:0;letter-spacing:2px}
-  body.is-fullscreen .bt-meta{order:3;font-size:clamp(6px,.75vw,11px);margin:0;letter-spacing:1px}
-  body.is-fullscreen .leadtag{order:4;margin:0;font-size:clamp(6px,.7vw,10px);padding:3px 9px}
-  body.is-fullscreen .board-top .crown{font-size:clamp(32px,4vw,60px)}
+  /* fullscreen header = centered scoreboard figure: NAME on top, then the big total
+     with its POINTS / N PLAYERS labels stacked beside it, LEADING badge below —
+     everything centered & aligned; crowns flank the leader at the edges */
+  body.is-fullscreen .board-top{flex-direction:column;align-items:center;justify-content:center;
+    gap:clamp(2px,.6vh,7px);padding:clamp(6px,1vh,16px) clamp(54px,6vw,100px)}
+  body.is-fullscreen .bt-name{font-size:clamp(12px,2.3vh,24px);letter-spacing:3px}
+  body.is-fullscreen .bt-figure{flex-direction:row;align-items:center;gap:clamp(8px,1vw,18px)}
+  body.is-fullscreen .bt-total{font-size:clamp(30px,5.4vh,72px);line-height:.9;text-shadow:3px 3px 0 rgba(0,0,0,.35)}
+  body.is-fullscreen .bt-labels{align-items:flex-start;gap:clamp(1px,.3vw,4px)}
+  body.is-fullscreen .bt-pts{font-size:clamp(6px,.72vw,10px);letter-spacing:2px;opacity:.85;margin:0;text-align:left}
+  body.is-fullscreen .bt-meta{font-size:clamp(7px,.82vw,12px);letter-spacing:1px;margin:0;text-align:left}
+  body.is-fullscreen .leadtag{margin:clamp(1px,.3vw,4px) 0 0;font-size:clamp(6px,.7vw,10px);padding:3px 10px}
+  body.is-fullscreen .board-top .crown{font-size:clamp(30px,3.6vw,54px)}
   body.is-fullscreen .board-mvp{padding:clamp(3px,.4vw,7px) 12px;gap:clamp(6px,.8vw,14px)}
   body.is-fullscreen .board-mvp .bm-lbl{font-size:clamp(6px,.72vw,10px)}
   body.is-fullscreen .board-mvp .bm-name{font-size:clamp(10px,1.05vw,15px)}
@@ -187,10 +196,10 @@
   body.is-fullscreen .rows{display:flex;flex-direction:column;overflow-y:auto}
   body.is-fullscreen .row{flex:1 1 0;min-height:clamp(14px,2.3vh,38px);padding:0 clamp(12px,1.2vw,20px)}
   body.is-fullscreen .who{flex-wrap:nowrap;overflow:hidden}
-  body.is-fullscreen .rank{font-size:clamp(11px,1.3vw,20px)}
-  body.is-fullscreen .pname{font-size:clamp(11px,1.4vw,22px)}
-  body.is-fullscreen .score{font-size:clamp(14px,1.6vw,28px)}
-  body.is-fullscreen .trophy{font-size:clamp(11px,1.2vw,18px)}
+  body.is-fullscreen .rank{font-size:clamp(10px,1.9vh,20px)}
+  body.is-fullscreen .pname{font-size:clamp(10px,2vh,22px)}
+  body.is-fullscreen .score{font-size:clamp(12px,2.3vh,28px)}
+  body.is-fullscreen .trophy{font-size:clamp(10px,1.8vh,18px)}
   body.is-fullscreen .badge{font-size:clamp(6px,.7vw,10px);padding:3px 6px}
 
   /* ── deer.supply ad (full-screen only) — fills the entire screen ── */
@@ -283,6 +292,8 @@
 <body>
   <div class="scene">
     <div class="ground"></div>
+    <!-- live status sits on the water; the canoe (next sibling) runs over it -->
+    <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Loading…</span></div>
     <div class="canoe"><img src="Canoe.png" alt=""></div>
   </div>
   <div class="frame"></div>
@@ -294,7 +305,6 @@
       <div class="titles">
         <h1>2026 CANADA DAY BEEROLYMPICS</h1>
         <div class="sub">🍁 LIVE TEAM LEADERBOARD 🍁</div>
-        <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Loading…</span></div>
       </div>
     </div>
 
@@ -309,9 +319,13 @@
           <div class="crown crown-l">👑</div>
           <div class="crown crown-r">👑</div>
           <div class="bt-name">RED TEAM</div>
-          <div class="bt-total" id="redTotal">—</div>
-          <div class="bt-pts">POINTS</div>
-          <div class="bt-meta" id="redMeta">— PLAYERS</div>
+          <div class="bt-figure">
+            <div class="bt-total" id="redTotal">—</div>
+            <div class="bt-labels">
+              <div class="bt-pts">POINTS</div>
+              <div class="bt-meta" id="redMeta">— PLAYERS</div>
+            </div>
+          </div>
           <div class="leadtag">👑 LEADING</div>
         </div>
         <div class="board-mvp" id="mvpRed"><span class="bm-lbl">🏆 RED MVP</span><span class="bm-name">—</span></div>
@@ -325,9 +339,13 @@
           <div class="crown crown-l">👑</div>
           <div class="crown crown-r">👑</div>
           <div class="bt-name">WHITE TEAM</div>
-          <div class="bt-total" id="whiteTotal">—</div>
-          <div class="bt-pts">POINTS</div>
-          <div class="bt-meta" id="whiteMeta">— PLAYERS</div>
+          <div class="bt-figure">
+            <div class="bt-total" id="whiteTotal">—</div>
+            <div class="bt-labels">
+              <div class="bt-pts">POINTS</div>
+              <div class="bt-meta" id="whiteMeta">— PLAYERS</div>
+            </div>
+          </div>
           <div class="leadtag">👑 LEADING</div>
         </div>
         <div class="board-mvp" id="mvpWhite"><span class="bm-lbl">🏆 WHITE MVP</span><span class="bm-name">—</span></div>
@@ -597,6 +615,28 @@
   refresh();
   setInterval(refresh,REFRESH_MS);
 
+  // ── auto-reload the page when a new build is deployed to Vercel ──
+  // Polls THIS document's ETag/Last-Modified (Vercel changes it on every deploy) and
+  // reloads when it differs from the version currently running — so the TV picks up
+  // design changes on its own. Waits out an active ad first. No manual version bumping.
+  const DEPLOY_CHECK_MS = 60000;
+  let deployTag = null;
+  async function checkForUpdate(){
+    try{
+      const res = await fetch(location.pathname+'?_v='+Date.now(),{method:'HEAD',cache:'no-store'});
+      if(!res.ok) return;
+      const tag = res.headers.get('etag')||res.headers.get('last-modified')||res.headers.get('content-length');
+      if(!tag) return;
+      if(deployTag===null){ deployTag=tag; return; }          // first sample = running version
+      if(tag!==deployTag){                                     // a new build is live
+        if(typeof adShowing==='function' && adShowing()) window.__reloadPending=true; // reload after the ad
+        else location.reload();
+      }
+    }catch(e){ /* offline / transient — retry next tick */ }
+  }
+  checkForUpdate();
+  setInterval(checkForUpdate, DEPLOY_CHECK_MS);
+
   // ── full-screen mode + deer.supply ad scheduler ──
   const AD_EVERY=5*60*1000, AD_DUR=30*1000;
   let adInterval=null, adTimeout=null, adTick=null;
@@ -611,22 +651,36 @@
     adTick=setInterval(()=>{ left--; tick(); if(left<=0)clearInterval(adTick); },1000);
     clearTimeout(adTimeout); adTimeout=setTimeout(hideAd,AD_DUR);
   }
-  function hideAd(){ adEl().classList.remove('show'); clearTimeout(adTimeout); clearInterval(adTick); }
+  function hideAd(){ adEl().classList.remove('show'); clearTimeout(adTimeout); clearInterval(adTick); if(window.__reloadPending) location.reload(); }
   // click / tap anywhere on the ad, or press space, to skip it
   adEl().addEventListener('click',()=>{ if(adShowing()) hideAd(); });
   document.addEventListener('keydown',e=>{ if(adShowing() && (e.code==='Space'||e.key===' ')){ e.preventDefault(); hideAd(); } });
   function startAds(){ stopAds(); adInterval=setInterval(showAd,AD_EVERY); }   // every 5 min while full-screen
   function stopAds(){ clearInterval(adInterval); adInterval=null; hideAd(); }
 
-  document.getElementById('fsBtn').addEventListener('click',()=>{
-    if(document.fullscreenElement) document.exitFullscreen?.();
-    else document.documentElement.requestFullscreen?.();
-  });
-  document.addEventListener('fullscreenchange',()=>{
-    const on=!!document.fullscreenElement;
+  // ── TV mode (the dense fullscreen layout) ──
+  // Decoupled from the browser Fullscreen API so it SURVIVES a reload: a reload drops
+  // real fullscreen (and browsers won't let us re-enter it without a user gesture), but
+  // we persist TV mode in localStorage and re-apply the layout on load. For an always-on
+  // TV, run the browser in kiosk / F11 OS-fullscreen — a reload won't exit that, so the
+  // window stays fullscreen while the auto-reload picks up new deploys.
+  function setTvMode(on){
     document.body.classList.toggle('is-fullscreen',on);
     if(on) startAds(); else stopAds();
+    try{ on ? localStorage.setItem('bo_tv','1') : localStorage.removeItem('bo_tv'); }catch(e){}
+  }
+  document.getElementById('fsBtn').addEventListener('click',()=>{
+    document.documentElement.requestFullscreen?.().catch(()=>{});  // best-effort true fullscreen
+    setTvMode(true);
   });
+  // if the browser leaves real fullscreen, drop TV mode too
+  document.addEventListener('fullscreenchange',()=>{ if(!document.fullscreenElement) setTvMode(false); });
+  // Esc always exits TV mode — also covers the reload-restored case (no FS API state to Esc out of)
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){ if(document.fullscreenElement) document.exitFullscreen?.(); setTvMode(false); }
+  });
+  // restore the TV layout after an auto-reload
+  try{ if(localStorage.getItem('bo_tv')) setTvMode(true); }catch(e){}
 </script>
 </body>
 </html>
