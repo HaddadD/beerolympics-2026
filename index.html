@@ -772,6 +772,7 @@
   }
 
   function showAd(){
+    if(document.hidden) return;   // never play (or blare music) from a background tab
     buildAd();
     const o=adEl(); o.dataset.scene='intro'; o.classList.add('show');
     document.getElementById('pixDeer').classList.add('bounce');
@@ -842,6 +843,11 @@
     clearInterval(schedTimer); schedTimer=setInterval(scheduler,25);
   }
   function stopMusic(){ musicOn=false; clearInterval(schedTimer); schedTimer=null; }
+  // never let the ad's music play from a hidden tab; resume it if an ad is still up on return
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden) stopMusic();
+    else if(adShowing()) startMusic();
+  });
   function startAds(){ stopAds(); adInterval=setInterval(showAd,AD_EVERY); }   // an ad every 5 min
   function stopAds(){ clearInterval(adInterval); adInterval=null; hideAd(); }
 
