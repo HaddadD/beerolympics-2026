@@ -21,47 +21,65 @@
     --whiterow:#f3f5f7; --whiterow2:#e9edf1;
     --mvprow:#fff3c4;
     --ink:#1a1a1a;
+    /* bottom "boat lane" — reserved so the running canoe is never clipped by the boards */
+    --boat-h:clamp(70px,8.5vw,118px);
+    --boat-bottom:clamp(40px,5vh,56px);
+    --lane:calc(var(--boat-bottom) + var(--boat-h) + clamp(16px,2vh,28px));
+    /* theme palette — overridden per leading team on <body>; default = WHITE-team / cream */
+    --page-bg:var(--cream);
+    --frame-col:var(--red);
+    --title-col:var(--red);
+    --title-sh:var(--dark);
+    --on-bg:var(--dark);
+    --muted:rgba(0,0,0,.5);
   }
+  /* RED team ahead → red theme · WHITE team ahead → white theme · tie → yellow theme */
+  body.theme-white{--page-bg:var(--cream);--frame-col:var(--red);--title-col:var(--red);--title-sh:var(--dark);--on-bg:var(--dark);--muted:rgba(0,0,0,.5)}
+  body.theme-red{--page-bg:#7d0000;--frame-col:var(--dark);--title-col:var(--white);--title-sh:var(--dark);--on-bg:var(--white);--muted:rgba(255,255,255,.78)}
+  body.theme-tie{--page-bg:#f2c200;--frame-col:var(--dark);--title-col:var(--dark);--title-sh:rgba(255,255,255,.55);--on-bg:var(--dark);--muted:rgba(0,0,0,.62)}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   html{height:100%}
   body{
-    min-height:100vh;
+    position:relative;min-height:100vh;
     font-family:'Press Start 2P','Courier New',monospace;
-    background:var(--cream);color:var(--ink);
+    background:var(--page-bg);color:var(--ink);transition:background .55s ease;
     overflow-x:hidden;-webkit-font-smoothing:none;image-rendering:pixelated;
   }
 
-  /* ── background layers (ground + running canoe) ── */
+  /* ── bottom scene: an opaque band holding the ground + running canoe, drawn IN
+        FRONT of the boards so the boat is never clipped. The app reserves --lane of
+        bottom padding so no leaderboard content is ever hidden behind it. ── */
+  .scene{position:absolute;left:0;bottom:0;width:100%;height:var(--lane);z-index:30;pointer-events:none;overflow:hidden;background:var(--page-bg);transition:background .55s ease}
   .ground{
-    position:fixed;left:0;bottom:0;width:100%;height:clamp(46px,6vh,74px);z-index:0;pointer-events:none;
+    position:absolute;left:0;bottom:0;width:100%;height:clamp(46px,6vh,74px);
     background:repeating-linear-gradient(90deg,var(--bl) 0,var(--bl) 48px,var(--bd) 48px,var(--bd) 50px);
     box-shadow:inset 0 6px 0 rgba(255,255,255,.12);
   }
-  .canoe{position:fixed;bottom:clamp(40px,5.5vh,66px);left:-520px;z-index:1;pointer-events:none;animation:run 16s linear infinite}
-  .canoe img{height:clamp(82px,11vw,140px);width:auto;display:block;image-rendering:pixelated;mix-blend-mode:multiply}
+  .canoe{position:absolute;bottom:var(--boat-bottom);left:-520px;animation:run 16s linear infinite}
+  .canoe img{height:var(--boat-h);width:auto;display:block;image-rendering:pixelated}
   @keyframes run{from{left:-520px}to{left:110%}}
   @media (prefers-reduced-motion:reduce){.canoe{animation:none;left:6%}}
 
   /* ── 8-bit frame ── */
-  .frame{position:fixed;inset:0;border:clamp(8px,1.4vw,26px) solid var(--red);pointer-events:none;z-index:40}
+  .frame{position:fixed;inset:0;border:clamp(8px,1.4vw,26px) solid var(--frame-col);pointer-events:none;z-index:40;transition:border-color .55s ease}
   .frame::after{content:'';position:absolute;inset:0;border:6px solid var(--dark)}
 
   /* ── app shell ── */
   .app{
     position:relative;z-index:5;max-width:1860px;margin:0 auto;min-height:100vh;
     display:flex;flex-direction:column;gap:clamp(10px,1.4vh,18px);
-    padding:clamp(18px,2.6vw,42px) clamp(16px,2.6vw,48px) clamp(56px,8vh,92px);
+    padding:clamp(18px,2.6vw,42px) clamp(16px,2.6vw,48px) var(--lane);
   }
 
   /* ── header ── */
   .topbar{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
-  .titles h1{font-size:clamp(15px,2.9vw,38px);color:var(--red);text-shadow:3px 3px 0 var(--dark);letter-spacing:1px;line-height:1.25}
-  .titles .sub{margin-top:10px;font-size:clamp(8px,1.05vw,13px);color:var(--dark);opacity:.7;letter-spacing:2px}
+  .titles h1{font-size:clamp(15px,2.9vw,38px);color:var(--title-col);text-shadow:3px 3px 0 var(--title-sh);letter-spacing:1px;line-height:1.25}
+  .titles .sub{margin-top:10px;font-size:clamp(8px,1.05vw,13px);color:var(--on-bg);opacity:.75;letter-spacing:2px}
   .toolbar{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
   .fsbtn{font-family:inherit;font-size:clamp(8px,.9vw,11px);cursor:pointer;color:var(--white);background:var(--red);border:4px solid var(--dark);padding:10px 14px;letter-spacing:1px;box-shadow:3px 3px 0 rgba(0,0,0,.3)}
   .fsbtn:hover{background:var(--red-d)}
   .fsbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(0,0,0,.3)}
-  .status{font-size:clamp(7px,.8vw,10px);letter-spacing:1px;color:rgba(0,0,0,.5);text-align:right}
+  .status{font-size:clamp(7px,.8vw,10px);letter-spacing:1px;color:var(--muted);text-align:right}
   .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#44cc44;margin-right:6px;vertical-align:middle;animation:pulse 2s infinite}
   .dot.fetching{background:#ffaa00;animation:none}
   .dot.error{background:#ff4444;animation:none}
@@ -153,8 +171,10 @@
 </style>
 </head>
 <body>
-  <div class="ground"></div>
-  <div class="canoe"><img src="Canoe.png" alt=""></div>
+  <div class="scene">
+    <div class="ground"></div>
+    <div class="canoe"><img src="Canoe.png" alt=""></div>
+  </div>
   <div class="frame"></div>
 
   <div class="app">
@@ -334,16 +354,20 @@
     const leadBar=document.getElementById('leadBar');
     boardRed.classList.remove('is-leading'); boardWhite.classList.remove('is-leading');
     const diff=Math.abs(redTotal-whiteTotal);
+    let theme;
     if(redTotal>whiteTotal){
-      boardRed.classList.add('is-leading');
+      theme='theme-red'; boardRed.classList.add('is-leading');
       leadBar.className='leadbar red';leadBar.textContent='🔴 RED TEAM LEADS BY '+diff+' PT'+(diff===1?'':'S');
     }else if(whiteTotal>redTotal){
-      boardWhite.classList.add('is-leading');
+      theme='theme-white'; boardWhite.classList.add('is-leading');
       leadBar.className='leadbar white';leadBar.textContent='⚪ WHITE TEAM LEADS BY '+diff+' PT'+(diff===1?'':'S');
     }else{
-      leadBar.className='leadbar tie';
+      theme='theme-tie'; leadBar.className='leadbar tie';
       leadBar.textContent=(redTotal===0&&whiteTotal===0)?'🍁 NO SCORES YET — GAME ON!':'🍁 DEAD HEAT — TEAMS TIED AT '+redTotal;
     }
+    // page-level theme follows the leader (keeps the is-fullscreen class intact)
+    document.body.classList.remove('theme-red','theme-white','theme-tie');
+    document.body.classList.add(theme);
   }
 
   // ── fetch loop (fires immediately on load; refreshes every 30s) ──

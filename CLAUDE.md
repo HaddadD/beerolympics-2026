@@ -18,7 +18,8 @@ JSON from a Google Apps Script.
 Retro 8-bit arcade look: `Press Start 2P` pixel font (**self-hosted, inlined as
 base64** so it renders even with no access to Google Fonts), Canada red/white
 palette, a brick-ground strip, and a looping pixel-art canoe (`Canoe.png`) that runs
-across the bottom. The layout is **responsive**: it fills the viewport on desktop and
+across a dedicated bottom "scene" band (`--lane`, reserved as the app's bottom padding)
+so the boat is drawn in front of — and never clipped by — the team boards. The layout is **responsive**: it fills the viewport on desktop and
 reflows to a single stacked column on phones. There is also a **Full Screen** button
 (Fullscreen API) for the big-screen presentation.
 
@@ -54,6 +55,11 @@ If scores need to change, edit the **Google Sheet / Apps Script**, not this repo
   scores share a rank, e.g. `1, 1, 3`); the top 3 ranks get gold/silver/bronze accents.
 - **Who's winning:** a colored banner ("RED TEAM LEADS BY N PTS" / "DEAD HEAT — TEAMS
   TIED AT N") plus a crown 👑, gold glow, and "LEADING" tag on the leading team's board.
+- **Dynamic page theme:** the whole page re-themes to follow the leader — `theme-red`
+  (deep-red page) when Red leads, `theme-white` (cream page) when White leads, and
+  `theme-tie` (yellow page) on a dead heat. Theme-able colors (page/scene background,
+  frame, title, subtitle, status) are CSS variables overridden per `body.theme-*` class,
+  chosen for contrast against each background; team boards keep their own colors.
 - **MVP is per team:** each board's top scorer is that team's MVP — shown in a gold
   `🏆 <TEAM> MVP` strip and badged with `⭐ MVP` + 🏆 in their row.
 - **Ties are first-class:** if multiple players tie for a team's top score, that team's
