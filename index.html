@@ -210,10 +210,13 @@
   @property --belly{syntax:'<length>';inherits:true;initial-value:0px}
   .ad{position:fixed;inset:0;z-index:200;display:none;cursor:pointer;overflow:hidden;
     background:radial-gradient(ellipse at 50% 42%,#13245a 0%,#0a1030 55%,#03030c 100%)}
+  .ad.bg-white{background:radial-gradient(ellipse at 50% 42%,#fffdf5 0%,#f4ecd8 68%,#e6d8bd 100%)}
+  .ad.bg-red{background:radial-gradient(ellipse at 50% 42%,#e01414 0%,#8f0000 66%,#360000 100%)}
   .ad::before{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;
     background:repeating-linear-gradient(180deg,transparent 0,transparent 2px,rgba(0,0,0,.22) 2px,rgba(0,0,0,.22) 4px)}
   .ad::after{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;
     background:radial-gradient(ellipse at 50% 50%,transparent 36%,rgba(0,0,0,.6) 100%);animation:crtFlicker 5s steps(2) infinite}
+  .ad.bg-white::after{background:radial-gradient(ellipse at 50% 50%,transparent 42%,rgba(120,80,20,.22) 100%)}
   @keyframes crtFlicker{48%{opacity:1}50%{opacity:.86}52%{opacity:1}}
   .ad.show{display:block;animation:adIn .45s steps(4)}
   @keyframes adIn{from{opacity:0}to{opacity:1}}
@@ -284,6 +287,48 @@
     font-size:clamp(9px,1.1vw,14px);color:#ffd23b;letter-spacing:2px;animation:timerBlink 1s steps(2) infinite}
   @keyframes timerBlink{50%{opacity:.35}}
 
+  /* which ad "program" is showing */
+  .ad:not([data-ad="deerfx"]) .ad-screen{display:none}
+  .ad-card{position:absolute;inset:0;z-index:1;display:none;align-items:center;justify-content:center;padding:clamp(58px,9vh,108px) 6vw clamp(70px,11vh,120px)}
+  .ad[data-ad="card"] .ad-card{display:flex}
+  .ad-wash{position:absolute;inset:0;z-index:2;display:none;align-items:center;justify-content:center;background:#fff}
+  .ad[data-ad="wash"] .ad-wash{display:flex}
+
+  /* generic card ad — sprite + brand + cycling tagline, gently DRIFTING for burn-in */
+  .card-inner{display:flex;flex-direction:column;align-items:center;text-align:center;
+    gap:clamp(8px,2vh,26px);animation:adDrift 11s ease-in-out infinite}
+  .ad.burnin .card-inner{animation-duration:6.5s}
+  .ad.burnin .ad-screen{animation:adDrift 8s ease-in-out infinite}
+  @keyframes adDrift{0%{transform:translate(-4vw,-3vh)}25%{transform:translate(4vw,-2vh)}50%{transform:translate(3vw,3vh)}75%{transform:translate(-3vw,2vh)}100%{transform:translate(-4vw,-3vh)}}
+  .card-sprite{--px:clamp(6px,1.4vw,14px);filter:drop-shadow(4px 5px 0 rgba(0,0,0,.4));animation:deerHop .7s steps(2) infinite}
+  .card-brand{font-size:clamp(30px,6.4vw,86px);letter-spacing:2px;line-height:1;text-shadow:4px 4px 0 rgba(0,0,0,.35);animation:brandPulse 1.5s steps(2) infinite}
+  .card-sub{font-size:clamp(11px,1.8vw,24px);letter-spacing:3px}
+  .card-line{font-size:clamp(15px,3vw,40px);letter-spacing:1px;line-height:1.3;min-height:1.3em;animation:linePop .5s cubic-bezier(.22,1,.36,1)}
+  @keyframes linePop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+  .card-cta{margin-top:clamp(4px,1vh,10px);font-size:clamp(12px,1.8vw,24px);letter-spacing:2px;
+    border:5px solid;padding:clamp(9px,1.5vh,16px) clamp(16px,3vw,40px);box-shadow:6px 6px 0 rgba(0,0,0,.5)}
+  /* dark-bg card colors */
+  .ad.bg-dark .card-sub{color:#7ad7ff}
+  .ad.bg-dark .card-line{color:#fff;text-shadow:2px 2px 0 #000}
+  .ad.bg-dark .card-cta{background:#ff2b2b;color:#fff;border-color:#fff}
+  /* white-bg card colors */
+  .ad.bg-white .card-sub{color:#0a7d78}
+  .ad.bg-white .card-line{color:#181818}
+  .ad.bg-white .card-cta{background:#cc0000;color:#fff;border-color:#181818}
+  .ad.bg-white .ad-tag{color:rgba(0,0,0,.45);border-color:rgba(0,0,0,.2);background:rgba(255,255,255,.5)}
+  .ad.bg-white .ad-fine{color:rgba(0,0,0,.42)}
+  .ad.bg-white .ad-timer{color:#a8730a}
+
+  /* pixel-refresh wash — cycles solid colours + a sweeping band to exercise every pixel */
+  .ad-wash::before{content:'';position:absolute;inset:0;
+    background:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.55) 50%,transparent 58%);animation:washBand 1.2s linear infinite}
+  @keyframes washBand{from{transform:translateX(-70%)}to{transform:translateX(70%)}}
+  .wash-label{position:relative;font-size:clamp(16px,3.2vw,42px);letter-spacing:4px;color:#fff;mix-blend-mode:difference}
+
+  /* burn-in toggle button: lit green when active */
+  .iconbtn.on{background:#2ecc40;color:#08210f;border-color:#08210f}
+  .iconbtn.on:hover{background:#28b638}
+
   /* ── animations & motion polish ── */
   .row{position:relative}
   @keyframes rowout{to{opacity:0;transform:translateX(16px)}}
@@ -335,6 +380,7 @@
     <!-- HEADER -->
     <div class="topbar">
       <div class="toolbtns">
+        <button class="iconbtn burnbtn" id="burnBtn" title="Reduce burn-in (run ads often)" aria-label="Reduce burn-in">⟳</button>
         <button class="iconbtn adbtn" id="adBtn" title="Play ad now" aria-label="Play ad now">▶</button>
         <button class="iconbtn fsbtn" id="fsBtn" title="Full screen" aria-label="Full screen">⛶</button>
       </div>
@@ -391,8 +437,8 @@
     </div>
   </div>
 
-  <!-- DEER.SUPPLY — 8-bit video ad (TV / fullscreen only) -->
-  <div class="ad" id="adOverlay" data-scene="intro">
+  <!-- 8-bit ads (TV / fullscreen only): rotating deer.supply + Justin's Slippery Throat -->
+  <div class="ad" id="adOverlay" data-ad="deerfx" data-scene="intro">
     <div class="ad-tag">ADVERTISEMENT</div>
     <div class="ad-screen" id="adScreen">
 
@@ -427,7 +473,22 @@
       </div>
 
     </div>
-    <div class="ad-fine">Dramatization based on published retatrutide clinical-trial data (a GLP-1 / GIP / glucagon receptor agonist; highest-dose participants lost roughly a quarter of their body weight over ~72 weeks). deer.supply &amp; RETA-DEER™ are a FICTIONAL sponsor shown purely for entertainment at this backyard event — not a real product and not medical advice. Prescription weight-loss medication requires assessment by a licensed clinician; individual results vary.</div>
+
+    <!-- generic card ad (deer.supply variants + Justin's Slippery Throat) -->
+    <div class="ad-card" id="adCard">
+      <div class="card-inner">
+        <div class="pix card-sprite" id="cardSprite"></div>
+        <div class="card-brand"></div>
+        <div class="card-sub"></div>
+        <div class="card-line"></div>
+        <div class="card-cta"></div>
+      </div>
+    </div>
+
+    <!-- pixel-refresh wash (burn-in mode) -->
+    <div class="ad-wash" id="adWash"><div class="wash-label">PIXEL REFRESH</div></div>
+
+    <div class="ad-fine" id="adFine"></div>
     <div class="ad-timer" id="adTimer">CLOSES IN 30S · TAP OR PRESS SPACE TO SKIP</div>
   </div>
 
@@ -739,6 +800,26 @@
     ".B...B..B..B...",
     ".N...N..N..N...",
   ];
+  // 8-bit bottle sprite for Justin's Slippery Throat
+  const BOTTLE_PAL={C:'#20201f',G:'#2ec7c2',D:'#1b8f8b',L:'#f3e7d2',H:'#ffffff'};
+  const BOTTLE=[
+    "....CCC....",
+    "....CCC....",
+    "....GGG....",
+    "...GGGGG...",
+    "..GGGGGGG..",
+    ".GGGGGGGGG.",
+    ".GHGGGGGGD.",
+    ".GLLLLLLLD.",
+    ".GLLLLLLLD.",
+    ".GLLLLLLLD.",
+    ".GHGGGGGGD.",
+    ".GGGGGGGGD.",
+    ".GGGGGGGGD.",
+    ".DGGGGGGDD.",
+    "..DDDDDDD..",
+    "...DDDDD...",
+  ];
   function makeFigure(){
     const f=document.createElement('div'); f.className='figure';
     f.innerHTML='<div class="f-head"></div><div class="f-neck"></div><div class="f-torso"></div><div class="f-legs"><i></i><i></i></div>';
@@ -783,22 +864,87 @@
     if(t<31) adRAF=requestAnimationFrame(adFrame);
   }
 
+  // ── ad catalog: rotates deer.supply variants + Justin's Slippery Throat; some white-bg ──
+  let burnIn=false;
+  const DEER_FINE='Dramatization based on published retatrutide clinical-trial data (a GLP-1 / GIP / glucagon receptor agonist; highest-dose participants lost roughly a quarter of their body weight over ~72 weeks). deer.supply & RETA-DEER™ are a FICTIONAL sponsor shown purely for entertainment — not a real product and not medical advice.';
+  const JUSTIN_FINE="Justin's Slippery Throat™ is a FICTIONAL party sponsor shown purely for entertainment on Canada Day — not a real product. Please drink responsibly.";
+  const ADS=[
+    {kind:'deerfx', bg:'dark', tune:'deer', fine:DEER_FINE},
+    {kind:'card', bg:'white', tune:'deer', sprite:DEER, pal:DEER_PAL, px:'clamp(6px,1.4vw,15px)',
+      accent:'#cc0000', brand:'deer.supply', sub:'RETA-DEER™ · WEIGHT LOSS',
+      lines:['SHED THE WEIGHT.','KEEP THE CHEER. 🍺','DELIVERED TO YOUR DOOR','NO CLINIC LINE-UPS'],
+      cta:'ASK YOUR DOCTOR → deer.supply', fine:DEER_FINE},
+    {kind:'card', bg:'dark', tune:'justin', sprite:BOTTLE, pal:BOTTLE_PAL, px:'clamp(8px,1.7vw,17px)',
+      accent:'#3ee0da', brand:"JUSTIN'S", sub:'SLIPPERY THROAT™',
+      lines:['SLIDES DOWN SMOOTH','CHUG LIKE A CHAMPION','NEVER FEAR THE FOAM','ONE SIP · ALL GULP'],
+      cta:'GET SLIPPERY → justins.throat', fine:JUSTIN_FINE},
+    {kind:'card', bg:'white', tune:'justin', sprite:BOTTLE, pal:BOTTLE_PAL, px:'clamp(8px,1.7vw,17px)',
+      accent:'#0a8f8a', brand:"JUSTIN'S", sub:'SLIPPERY THROAT™',
+      lines:['THE OFFICIAL CHUG FUEL','SMOOTHER EVERY ROUND','BEAT THE BURN 🔥','CANADA DAY APPROVED 🍁'],
+      cta:'GET SLIPPERY → justins.throat', fine:JUSTIN_FINE},
+  ];
+  let adPtr=0, adPlays=0, currentAd=null, cardTimer=null, washTimer=null;
+  function pickNextAd(){
+    adPlays++;
+    if(burnIn && adPlays%4===0) return {kind:'wash', bg:'dark', tune:'wash', dur:9000, fine:''};
+    return ADS[adPtr++ % ADS.length];
+  }
+
   function showAd(){
     if(document.hidden) return;   // never play (or blare music) from a background tab
+    playAd(pickNextAd());
+  }
+  function playAd(spec){
     buildAd();
-    const o=adEl(); o.dataset.scene='intro'; o.classList.add('show');
+    currentAd=spec;
+    const o=adEl();
+    o.classList.remove('bg-white','bg-red','bg-dark'); o.classList.add('bg-'+spec.bg);
+    o.classList.toggle('burnin', !!burnIn);
+    o.dataset.ad=spec.kind;
+    o.classList.add('show');
+    document.getElementById('adFine').textContent = spec.fine||'';
+    cancelAnimationFrame(adRAF); clearInterval(cardTimer); clearInterval(washTimer);
+    if(spec.kind==='deerfx') startDeerFx();
+    else if(spec.kind==='card') startCardAd(spec);
+    else if(spec.kind==='wash') startWash(spec);
+    startAdTimer(spec.dur||AD_DUR);
+    startMusic(spec.tune);
+  }
+  function startDeerFx(){
+    const o=adEl(); o.dataset.scene='intro';
     document.getElementById('pixDeer').classList.add('bounce');
     adStart=performance.now();
-    cancelAnimationFrame(adRAF); adRAF=requestAnimationFrame(adFrame);
-    startMusic();
-    let left=AD_DUR/1000; const t=document.getElementById('adTimer');
+    adRAF=requestAnimationFrame(adFrame);
+  }
+  function startCardAd(spec){
+    const host=document.getElementById('adCard');
+    const sprite=host.querySelector('.card-sprite');
+    sprite.style.setProperty('--px', spec.px||'clamp(6px,1.4vw,14px)');
+    buildSprite(sprite, spec.sprite, spec.pal);
+    const brand=host.querySelector('.card-brand'); brand.textContent=spec.brand; brand.style.color=spec.accent||'';
+    host.querySelector('.card-sub').textContent=spec.sub||'';
+    host.querySelector('.card-cta').textContent=spec.cta||'';
+    const lineEl=host.querySelector('.card-line');
+    let li=0; lineEl.textContent=spec.lines[0];
+    cardTimer=setInterval(()=>{ li=(li+1)%spec.lines.length; lineEl.textContent=spec.lines[li];
+      lineEl.style.animation='none'; void lineEl.offsetWidth; lineEl.style.animation=''; }, 3000);
+  }
+  const WASH_COLORS=['#ffffff','#ff2b2b','#2ecc40','#1e6bff','#000000','#ffd23b','#ff37e6','#00e5e5'];
+  function startWash(){
+    const w=document.getElementById('adWash'); let i=0;
+    const step=()=>{ w.style.background=WASH_COLORS[i%WASH_COLORS.length]; i++; };
+    step(); washTimer=setInterval(step, 500);
+  }
+  function startAdTimer(dur){
+    let left=Math.round(dur/1000); const t=document.getElementById('adTimer');
     const tick=()=>{ t.textContent='CLOSES IN '+Math.max(0,left)+'S · TAP OR PRESS SPACE TO SKIP'; };
     tick(); clearInterval(adTick);
     adTick=setInterval(()=>{ left--; tick(); if(left<=0)clearInterval(adTick); },1000);
-    clearTimeout(adTimeout); adTimeout=setTimeout(hideAd,AD_DUR);
+    clearTimeout(adTimeout); adTimeout=setTimeout(hideAd,dur);
   }
   function hideAd(){
-    adEl().classList.remove('show'); clearTimeout(adTimeout); clearInterval(adTick);
+    adEl().classList.remove('show');
+    clearTimeout(adTimeout); clearInterval(adTick); clearInterval(cardTimer); clearInterval(washTimer);
     cancelAnimationFrame(adRAF); stopMusic();
     if(window.__reloadPending) safeReload();
   }
@@ -808,13 +954,24 @@
 
   // ── 8-bit chiptune soundtrack (Web Audio) — upbeat, plays during the ad ──
   let actx=null, masterGain=null, musicOn=false, schedTimer=null, nextNote=0, stepN=0;
-  const STEP=0.15;                       // 8th-note length (~100 BPM feel)
   const mfreq=m=>440*Math.pow(2,(m-69)/12);
-  //                bars in C major — bright & bouncy
-  const LEAD=[72,76,79,76, 77,81,79,77, 74,77,81,79, 79,83,84,81,
-              72,76,79,76, 77,81,79,84, 83,79,76,79, 72,67,72,null];
-  const BASS=[48,48,55,55, 53,53,52,52, 50,50,57,57, 55,55,55,55,
-              48,48,55,55, 53,53,52,52, 50,50,57,57, 55,53,48,48];
+  // one chiptune per brand (lead=square, bass=triangle, step=8th-note length)
+  const TUNES={
+    deer:{step:0.15,
+      lead:[72,76,79,76, 77,81,79,77, 74,77,81,79, 79,83,84,81,
+            72,76,79,76, 77,81,79,84, 83,79,76,79, 72,67,72,null],
+      bass:[48,48,55,55, 53,53,52,52, 50,50,57,57, 55,55,55,55,
+            48,48,55,55, 53,53,52,52, 50,50,57,57, 55,53,48,48]},
+    justin:{step:0.16,
+      lead:[69,72,74,76, 74,72,69,null, 67,69,71,72, 71,69,67,null,
+            69,72,76,79, 76,72,69,72, 74,71,69,67, 69,null,69,null],
+      bass:[45,45,45,45, 41,41,41,41, 43,43,43,43, 40,40,40,40,
+            45,45,45,45, 41,41,41,41, 43,43,43,43, 40,40,47,47]},
+    wash:{step:0.11,
+      lead:[84,86,88,89, 91,89,88,86, 84,86,88,89, 91,93,91,89],
+      bass:[48,48,48,48, 50,50,50,50, 52,52,52,52, 55,55,53,53]},
+  };
+  let curTune=TUNES.deer;
   function audioCtx(){
     if(actx===null){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ actx=false; } }
     return actx||null;
@@ -839,19 +996,21 @@
   }
   function scheduler(){
     const c=actx; if(!c) return;
+    const lead=curTune.lead, bass=curTune.bass, step=curTune.step;
     while(nextNote < c.currentTime + 0.12){
-      const i=stepN%LEAD.length;
-      if(LEAD[i]!=null) tone(mfreq(LEAD[i]),nextNote,STEP*0.9,'square',0.14);
-      if(BASS[i]!=null) tone(mfreq(BASS[i]-12),nextNote,STEP*0.95,'triangle',0.22);
+      const i=stepN%lead.length;
+      if(lead[i]!=null) tone(mfreq(lead[i]),nextNote,step*0.9,'square',0.14);
+      if(bass[i]!=null) tone(mfreq(bass[i]-12),nextNote,step*0.95,'triangle',0.22);
       if(i%2===0) hat(nextNote);
-      nextNote+=STEP; stepN++;
+      nextNote+=step; stepN++;
     }
   }
-  function startMusic(){
+  function startMusic(tune){
+    if(tune) curTune = TUNES[tune] || TUNES.deer;   // no arg → keep current tune (visibility resume)
     const c=audioCtx(); if(!c) return;
     if(c.state==='suspended') c.resume().catch(()=>{});
     if(!masterGain){ masterGain=c.createGain(); masterGain.gain.value=0.16; masterGain.connect(c.destination); }
-    if(musicOn) return; musicOn=true; stepN=0; nextNote=c.currentTime+0.08;
+    musicOn=true; stepN=0; nextNote=c.currentTime+0.08;
     clearInterval(schedTimer); schedTimer=setInterval(scheduler,25);
   }
   function stopMusic(){ musicOn=false; clearInterval(schedTimer); schedTimer=null; }
@@ -860,8 +1019,18 @@
     if(document.hidden) stopMusic();
     else if(adShowing()) startMusic();
   });
-  function startAds(){ stopAds(); adInterval=setInterval(showAd,AD_EVERY); }   // an ad every 5 min
+  const BURNIN_EVERY=40*1000;                 // burn-in mode: an ad every 40s
+  let adEvery=AD_EVERY;
+  function startAds(){ stopAds(); adInterval=setInterval(showAd,adEvery); }
   function stopAds(){ clearInterval(adInterval); adInterval=null; hideAd(); }
+  // burn-in reduction: run ads often + move content + alternate white/dark; toggled by the ⟳ button
+  function setBurnIn(on){
+    burnIn=on; adEvery = on?BURNIN_EVERY:AD_EVERY;
+    document.getElementById('burnBtn').classList.toggle('on',on);
+    try{ on?localStorage.setItem('bo_burnin','1'):localStorage.removeItem('bo_burnin'); }catch(e){}
+    if(adsAllowed()) startAds();               // restart scheduler at the new cadence
+    if(on && !adShowing() && !document.hidden) showAd();   // kick one off right away
+  }
 
   // The ad plays on DESKTOP regardless of fullscreen / TV mode (skipped on phone-width layouts).
   const adsAllowed = ()=> window.matchMedia('(min-width:781px)').matches;
@@ -891,6 +1060,11 @@
     const c=audioCtx(); if(c&&c.state==='suspended') c.resume().catch(()=>{});
     showAd();
   });
+  // toggle burn-in reduction mode
+  document.getElementById('burnBtn').addEventListener('click',()=>{
+    const c=audioCtx(); if(c&&c.state==='suspended') c.resume().catch(()=>{});
+    setBurnIn(!burnIn);
+  });
 
   // only drop TV mode when REAL fullscreen that we entered is exited (a stray event at load
   // must not wipe the restored layout / persisted flag)
@@ -918,6 +1092,10 @@
   }
   syncAds();
   window.addEventListener('resize',syncAds);
+  // restore burn-in mode (or enable via ?burnin=1)
+  try{
+    if(/[?&]burnin=1(\b|&|$)/.test(location.search) || localStorage.getItem('bo_burnin')) setBurnIn(true);
+  }catch(e){}
 
   // hide the cursor after 30s of no mouse/key activity; any movement brings it back
   let cursorTimer=null;

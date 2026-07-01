@@ -87,22 +87,30 @@ when the lead changes hands, and the theme cross-fades. Idle flourishes: bobbing
 pulsing trophies + LEADING tag + winning-board ring, and a gently bobbing canoe. All
 motion is gated behind `prefers-reduced-motion`.
 
-## deer.supply ad — 8-bit video segment
+## 8-bit ads (deer.supply + Justin's Slippery Throat)
 
-A `deer.supply` sponsor ad (a **fictional** GLP-1/triple-agonist "RETA-DEER™" weight-loss
-brand, shown for entertainment only — see disclaimers in the ad copy) overlays the screen
-**every 5 minutes for 30 seconds** (`AD_EVERY` / `AD_DUR`). It plays on **desktop
-regardless of fullscreen** (`syncAds()` runs the scheduler at desktop width; skipped on
-phone-width layouts), not only in TV mode.
+A rotating catalog of **fictional** 8-bit sponsor ads (entertainment only — see the
+disclaimers in each ad's copy) overlays the screen **every 5 minutes for 30 seconds**
+(`AD_EVERY` / `AD_DUR`). Ads play on **desktop regardless of fullscreen** and **only
+while the tab is visible** (`syncAds()` at desktop width; `showAd()` bails if
+`document.hidden`). All are skippable by tap/space, auto-close, and have a CRT
+scanline/vignette overlay and a Web-Audio **chiptune** (one tune per brand in `TUNES`).
 
-It's a **4-scene animated "video"** driven by a `requestAnimationFrame` timeline:
-intro (pixel-art 8-bit deer + logo) → hero transformation (an 8-bit person slims from a
-high BMI to healthy as a `BMI`/`MONTH 0→18`/progress bar advance) → crowd results
-(`24% BODY WEIGHT GONE*`, a dramatization of published retatrutide trial figures) → CTA.
-Sprites are real pixel art (deer rendered from a char matrix into a CSS grid; people are
-blocky CSS figures whose belly width animates via an `@property --belly` length). A Web
-Audio **chiptune** plays during the ad (unlocked on the first user gesture). Skippable by
-tap/space; auto-closes at 30s; CRT scanline + vignette overlay.
+The catalog (`ADS`) rotates:
+- **deer.supply "video"** (`kind:'deerfx'`, dark bg) — the original 4-scene `rAF`
+  timeline: 8-bit deer intro → an 8-bit person slims from high BMI to healthy (`@property
+  --belly` inflates/deflates head+belly+legs) → `24% BODY WEIGHT GONE*` crowd → CTA. Numbers
+  are a dramatization of published retatrutide (GLP-1/GIP/glucagon) trial figures.
+- **card ads** (`kind:'card'`) — a generic renderer: pixel sprite (deer or the `BOTTLE`
+  sprite for Justin's) + brand + a cycling tagline + CTA, gently **drifting** for burn-in.
+  Variants include deer.supply on a **white** bg and **Justin's Slippery Throat™** on both
+  dark and white bgs. Backgrounds are `.ad.bg-dark` / `.ad.bg-white` / `.ad.bg-red`.
+
+**Burn-in reduction** (the ⟳ button next to ▶, persisted in `localStorage['bo_burnin']`,
+also `?burnin=1`): drops the cadence to every 40s (`BURNIN_EVERY`), speeds up the content
+drift, and injects a **pixel-refresh wash** (`kind:'wash'`) every 4th ad that cycles solid
+full-screen colours with a sweeping band — alternating bright/dark full-screen content is
+what actually exercises the panel and evens out wear.
 
 ## Running locally
 
