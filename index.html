@@ -572,6 +572,14 @@
 
   // remembered state between refreshes (for change/rank animations)
   let prevState={red:null,white:null}, prevLeader=null;
+  // latest shaped player lists, so ads can look up a live score by name
+  let lastTeams=null;
+  function playerScore(name){
+    if(!lastTeams) return null;
+    const n=normName(name);
+    const p=lastTeams.red.concat(lastTeams.white).find(x=>normName(x.name)===n);
+    return p?p.score:null;
+  }
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
 
   // tween a number element up/down (counts from 0 on first paint of the team totals)
@@ -688,6 +696,7 @@
   function render(data){
     const red   = teamPlayers(data.redPlayers,'red');
     const white = teamPlayers(data.whitePlayers,'white');
+    lastTeams = {red, white};   // expose live scores to the ads
     const sum = arr => arr.reduce((t,p)=>t+p.score,0);
     // team totals are the sheet's authoritative numbers (fallback: sum of players)
     const totals = sheetTeamTotals(data,sum(red),sum(white));
@@ -973,7 +982,9 @@
 
     {kind:'card', bg:'white', tune:'victory', sprite:TROPHY, pal:TROPHY_PAL, px:'clamp(9px,1.9vw,19px)',
       accent:'#c8a200', brand:'BRIAN #1', sub:'TEAM WHITE LEGEND',
-      lines:['THE GOAT OF THE GARAGE','12 POINTS OF PURE HEAT','MVP · UNANIMOUS','THE PRIDE OF WHITE','BOW TO BRIAN 👑'],
+      lines:['THE GOAT OF THE GARAGE',
+             ()=>{ const s=playerScore('Brian'); return (s!=null?s:'∞')+' POINTS OF PURE HEAT'; },
+             'MVP · UNANIMOUS','THE PRIDE OF WHITE','BOW TO BRIAN 👑'],
       cta:'ALL HAIL BRIAN', fine:BRIAN_FINE},
 
     {kind:'card', bg:'white', tune:'anthem', sprite:BALLOT, pal:BALLOT_PAL, px:'clamp(8px,1.7vw,17px)',
@@ -1038,8 +1049,9 @@
     host.querySelector('.card-sub').textContent=spec.sub||'';
     host.querySelector('.card-cta').textContent=spec.cta||'';
     const lineEl=host.querySelector('.card-line');
-    let li=0; lineEl.textContent=spec.lines[0];
-    cardTimer=setInterval(()=>{ li=(li+1)%spec.lines.length; lineEl.textContent=spec.lines[li];
+    const rline = v => typeof v==='function' ? v() : v;   // lines may be live (e.g. a player's score)
+    let li=0; lineEl.textContent=rline(spec.lines[0]);
+    cardTimer=setInterval(()=>{ li=(li+1)%spec.lines.length; lineEl.textContent=rline(spec.lines[li]);
       lineEl.style.animation='none'; void lineEl.offsetWidth; lineEl.style.animation=''; }, 3000);
   }
   const WASH_COLORS=['#ffffff','#ff2b2b','#2ecc40','#1e6bff','#000000','#ffd23b','#ff37e6','#00e5e5'];
