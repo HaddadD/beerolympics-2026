@@ -318,6 +318,13 @@
   .ad.bg-white .ad-tag{color:rgba(0,0,0,.45);border-color:rgba(0,0,0,.2);background:rgba(255,255,255,.5)}
   .ad.bg-white .ad-fine{color:rgba(0,0,0,.42)}
   .ad.bg-white .ad-timer{color:#a8730a}
+  /* red-bg card colours (propaganda / China) */
+  .ad.bg-red .card-sub{color:#ffe98a}
+  .ad.bg-red .card-line{color:#fff;text-shadow:2px 2px 0 rgba(0,0,0,.5)}
+  .ad.bg-red .card-cta{background:#111;color:#fff;border-color:#fff}
+  .ad.bg-red .ad-tag{color:rgba(255,255,255,.5);border-color:rgba(255,255,255,.28);background:rgba(0,0,0,.22)}
+  .ad.bg-red .ad-fine{color:rgba(255,255,255,.5)}
+  .ad.bg-red .ad-timer{color:#ffe98a}
 
   /* pixel-refresh wash — cycles solid colours + a sweeping band to exercise every pixel */
   .ad-wash::before{content:'';position:absolute;inset:0;
@@ -820,6 +827,82 @@
     "..DDDDDDD..",
     "...DDDDD...",
   ];
+  const TROPHY_PAL={G:'#ffcc33',D:'#8a6d00'};
+  const TROPHY=[
+    ".GGGGGGGGG.",
+    "GGGGGGGGGGG",
+    "G.GGGGGGG.G",
+    "G.GGGGGGG.G",
+    "GGGGGGGGGGG",
+    ".GGGGGGGGG.",
+    ".GGGGGGGGG.",
+    "..GGGGGGG..",
+    "...GGGGG...",
+    "....GGG....",
+    "....GGG....",
+    "...GGGGG...",
+    "..DDDDDDD..",
+    ".DDDDDDDDD.",
+  ];
+  const STAR_PAL={S:'#ffd23b'};
+  const STAR=[
+    "......S......",
+    ".....SSS.....",
+    ".....SSS.....",
+    "SSSSSSSSSSSSS",
+    ".SSSSSSSSSSS.",
+    "..SSSSSSSSS..",
+    "...SSSSSSS...",
+    "...SSSSSSS...",
+    "..SSSS.SSSS..",
+    ".SSS.....SSS.",
+    ".SS.......SS.",
+    "S...........S",
+  ];
+  const HEART_PAL={H:'#ffffff'};
+  const HEART=[
+    "..HHH...HHH..",
+    ".HHHHH.HHHHH.",
+    "HHHHHHHHHHHHH",
+    "HHHHHHHHHHHHH",
+    "HHHHHHHHHHHHH",
+    ".HHHHHHHHHHH.",
+    "..HHHHHHHHH..",
+    "...HHHHHHH...",
+    "....HHHHH....",
+    ".....HHH.....",
+    "......H......",
+  ];
+  const BALLOT_PAL={B:'#204a9c',W:'#f3e7d2',K:'#cc1111'};
+  const BALLOT=[
+    ".....WWW.....",
+    ".....W.W.....",
+    ".....WKW.....",
+    "...BBBBBBB...",
+    "..BBBBBBBBB..",
+    ".BBBBBBBBBBB.",
+    ".B.........B.",
+    ".B.........B.",
+    ".B.........B.",
+    ".B.........B.",
+    ".B.........B.",
+    ".BBBBBBBBBBB.",
+    "..BBBBBBBBB..",
+  ];
+  const SKULL_PAL={S:'#e8e0cc',K:'#141414'};
+  const SKULL=[
+    "..SSSSSSS..",
+    ".SSSSSSSSS.",
+    "SSSSSSSSSSS",
+    "SSKKSSSKKSS",
+    "SSKKSSSKKSS",
+    "SSSSSKSSSSS",
+    "SSSSSSSSSSS",
+    ".SSSSSSSSS.",
+    ".SKSKSKSKS.",
+    "..SSSSSSS..",
+    "...S.S.S...",
+  ];
   function makeFigure(){
     const f=document.createElement('div'); f.className='figure';
     f.innerHTML='<div class="f-head"></div><div class="f-neck"></div><div class="f-torso"></div><div class="f-legs"><i></i><i></i></div>';
@@ -868,6 +951,11 @@
   let burnIn=false;
   const DEER_FINE='Dramatization based on published retatrutide clinical-trial data (a GLP-1 / GIP / glucagon receptor agonist; highest-dose participants lost roughly a quarter of their body weight over ~72 weeks). deer.supply & RETA-DEER™ are a FICTIONAL sponsor shown purely for entertainment — not a real product and not medical advice.';
   const JUSTIN_FINE="Justin's Slippery Throat™ is a FICTIONAL party sponsor shown purely for entertainment on Canada Day — not a real product. Please drink responsibly.";
+  const BRIAN_FINE="A loving Beerolympics tribute to Brian, Team White's finest. Statistically the greatest — probably. All in good fun.";
+  const YAVEXIT_FINE="A satirical Beerolympics referendum. Yavuz remains deeply beloved and is going absolutely nowhere. No actual votes will be counted. Paid for by Citizens for a Slightly Smaller White Team.";
+  const PROP_FINE="A morale-boosting Beerolympics dispatch in vintage-poster style — all in good fun, and especially for you, Brian.";
+  const CHINA_FINE="An absurdist Beerolympics interlude, not a geopolitical statement of any kind. China is #1 in this ad only.";
+  const REDTRUST_FINE="A satirical attack ad. Red Team is genuinely great and completely trustworthy. Paid for by Team White in Monopoly money — all in good fun.";
   const ADS=[
     {kind:'deerfx', bg:'dark', tune:'deer', fine:DEER_FINE},
     {kind:'card', bg:'white', tune:'deer', sprite:DEER, pal:DEER_PAL, px:'clamp(6px,1.4vw,15px)',
@@ -882,6 +970,31 @@
       accent:'#0a8f8a', brand:"JUSTIN'S", sub:'SLIPPERY THROAT™',
       lines:['THE OFFICIAL CHUG FUEL','SMOOTHER EVERY ROUND','BEAT THE BURN 🔥','CANADA DAY APPROVED 🍁'],
       cta:'GET SLIPPERY → justins.throat', fine:JUSTIN_FINE},
+
+    {kind:'card', bg:'white', tune:'victory', sprite:TROPHY, pal:TROPHY_PAL, px:'clamp(9px,1.9vw,19px)',
+      accent:'#c8a200', brand:'BRIAN #1', sub:'TEAM WHITE LEGEND',
+      lines:['THE GOAT OF THE GARAGE','12 POINTS OF PURE HEAT','MVP · UNANIMOUS','THE PRIDE OF WHITE','BOW TO BRIAN 👑'],
+      cta:'ALL HAIL BRIAN', fine:BRIAN_FINE},
+
+    {kind:'card', bg:'white', tune:'anthem', sprite:BALLOT, pal:BALLOT_PAL, px:'clamp(8px,1.7vw,17px)',
+      accent:'#204a9c', brand:'YAVEXIT', sub:'A TEAM WHITE REFERENDUM',
+      lines:['SHOULD YAVUZ REMAIN?','☐ OUI      ☑ NON','ONE TEAM · ONE DESTINY','FREE TEAM WHITE','POLLS CLOSE AT DUSK'],
+      cta:'VOTE NON → YAVEXIT', fine:YAVEXIT_FINE},
+
+    {kind:'card', bg:'red', tune:'anthem', sprite:HEART, pal:HEART_PAL, px:'clamp(9px,1.9vw,18px)',
+      accent:'#ffffff', brand:'TEAM WHITE', sub:'WE LOVE YOU',
+      lines:['YOUR TEAM NEEDS YOU!','WE CAN DO IT! 💪','FOR VICTORY · FOR WHITE','ESPECIALLY YOU, BRIAN','LOOSE LIPS LOSE POINTS'],
+      cta:'ENLIST IN TEAM WHITE', fine:PROP_FINE},
+
+    {kind:'card', bg:'red', tune:'anthem', sprite:STAR, pal:STAR_PAL, px:'clamp(9px,1.9vw,18px)',
+      accent:'#ffd23b', brand:'CHINA #1', sub:'NUMBER ONE SUPER GUY',
+      lines:['CHINA NUMBER ONE!','EVERYONE ELSE: NUMBER TWO','UNLIMITED POWER','GREAT WALL OF CHUGS','ACCEPT NO SUBSTITUTE'],
+      cta:'CHINA #1 🥇', fine:CHINA_FINE},
+
+    {kind:'card', bg:'dark', tune:'anthem', sprite:SKULL, pal:SKULL_PAL, px:'clamp(9px,1.9vw,18px)',
+      accent:'#ff3b3b', brand:'RED TEAM?', sub:'CAN THEY BE TRUSTED?',
+      lines:['WHAT ARE THEY HIDING?','SHAKY POURS · SHAKIER MORALS','THE FOAM NEVER LIES','ASK YOURSELF: WHY RED?','THEY SKIPPED LEG DAY'],
+      cta:'PAID FOR BY TEAM WHITE', fine:REDTRUST_FINE},
   ];
   let adPtr=0, adPlays=0, currentAd=null, cardTimer=null, washTimer=null;
   function pickNextAd(){
@@ -970,6 +1083,16 @@
     wash:{step:0.11,
       lead:[84,86,88,89, 91,89,88,86, 84,86,88,89, 91,93,91,89],
       bass:[48,48,48,48, 50,50,50,50, 52,52,52,52, 55,55,53,53]},
+    anthem:{step:0.2,
+      lead:[67,67,67,72, 71,69,67,69, 71,71,72,74, 72,null,67,null,
+            67,67,69,71, 72,72,74,76, 74,72,71,69, 67,null,60,null],
+      bass:[36,36,43,43, 40,40,36,36, 41,41,43,43, 36,36,36,36,
+            36,36,43,43, 41,41,40,40, 43,43,43,43, 36,36,36,36]},
+    victory:{step:0.13,
+      lead:[72,72,72,76, 79,null,79,null, 76,79,84,null, 84,84,84,null,
+            83,81,79,76, 74,76,79,null, 81,84,88,null, 84,null,84,null],
+      bass:[48,48,48,48, 55,55,55,55, 53,53,52,52, 48,48,48,48,
+            50,50,50,50, 43,43,43,43, 45,45,44,44, 48,48,48,48]},
   };
   let curTune=TUNES.deer;
   function audioCtx(){
