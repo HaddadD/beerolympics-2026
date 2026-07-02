@@ -913,6 +913,22 @@
     ".BBBBBBBBB...",
     ".DDDDDDDDD...",
   ];
+  // rescued white iPhone (heart on screen, water droplets) for Emily's ad
+  const PHONE_PAL={W:'#f2f0ea',K:'#101418',H:'#ff4d6d',D:'#4db3ff',G:'#8a8f98'};
+  const PHONE=[
+    "..D......D.",
+    ".....D.....",
+    ".WWWWWWWWW.",
+    ".WGWWWWWWW.",
+    ".WKKKKKKKW.",
+    ".WKHHKHHKW.",
+    ".WKHHHHHKW.",
+    ".WKKHHHKKW.",
+    ".WKKKHKKKW.",
+    ".WKKKKKKKW.",
+    ".WKKKKKKKW.",
+    ".WWWWWWWWW.",
+  ];
   const SKULL_PAL={S:'#e8e0cc',K:'#141414'};
   const SKULL=[
     "..SSSSSSS..",
@@ -976,7 +992,8 @@
   const DEER_FINE='Dramatization based on published retatrutide clinical-trial data (a GLP-1 / GIP / glucagon receptor agonist; highest-dose participants lost roughly a quarter of their body weight over ~72 weeks). deer.supply & RETA-DEER™ are a FICTIONAL sponsor shown purely for entertainment — not a real product and not medical advice.';
   const JUSTIN_FINE="Justin's Slippery Throat™ is a FICTIONAL party sponsor shown purely for entertainment on Canada Day — not a real product. Please drink responsibly.";
   const BRIAN_FINE="A loving Beerolympics tribute to Brian, Team White's finest. Statistically the greatest — probably. All in good fun.";
-  const VIC_FINE="A heartfelt Beerolympics tribute to Vic, the beating heart of Team White. Numbers can't measure vibes — but we printed his anyway. We love you, Vic.";
+  const VIC_FINE="A heartfelt Beerolympics tribute to Vic, the beating heart of Team White. Numbers can't measure vibes — but we printed hers anyway. We love you, Vic.";
+  const EMILY_FINE="Dramatization of real events. One (1) iPhone 17 Pro Max (512GB, White) was recovered from the depths in a daring solo dive. Justin owes Emily forever. Jasper was lovingly supervised throughout and napped like a champion.";
   const YAVEXIT_FINE="A satirical Beerolympics referendum. Yavuz remains deeply beloved and is going absolutely nowhere. No actual votes will be counted. Paid for by Citizens for a Slightly Smaller White Team.";
   const PROP_FINE="A morale-boosting Beerolympics dispatch in vintage-poster style — all in good fun, and especially for you, Brian.";
   const CHINA_FINE="An absurdist Beerolympics interlude, not a geopolitical statement of any kind. China is #1 in this ad only.";
@@ -1029,10 +1046,26 @@
       accent:'#ff3b3b', brand:'RED TEAM?', sub:'CAN THEY BE TRUSTED?',
       lines:['WHAT ARE THEY HIDING?','SHAKY POURS · SHAKIER MORALS','THE FOAM NEVER LIES','ASK YOURSELF: WHY RED?','THEY SKIPPED LEG DAY'],
       cta:'PAID FOR BY TEAM WHITE', fine:REDTRUST_FINE},
+
+    {id:'emily', kind:'card', bg:'dark', tune:'victory', sprite:PHONE, pal:PHONE_PAL, px:'clamp(9px,1.9vw,19px)',
+      accent:'#ff4d6d', brand:'SAINT EMILY', sub:'TEAM RED · TOP MVP',
+      lines:['ONE LAKE. ONE PHONE. ONE MOM.',
+             ()=>{ const s=playerScore('Emily'); return (s!=null?s:'1000')+' POINTS · ONE LEGEND'; },
+             'SHE DIVES. SHE SAVES. SHE MOMS.',
+             'RESCUED: iPHONE 17 PRO MAX · 512GB · WHITE',
+             'ZERO CASUALTIES · FULL BATTERY',
+             'RETRIEVES. RESTORES. RAISES JASPER.',
+             'THE ONLY WATERPROOF THING AT BEEROLYMPICS',
+             'JASPER NAPPED. LEGENDS DON\'T.',
+             'EMILY. PRO. MAX.'],
+      cta:'THANK YOU EMILY 🤿', fine:EMILY_FINE},
   ];
+  // SOLO override: when set to an ad id, ONLY that ad plays (washes off too). Set to null to resume the full rotation.
+  const AD_SOLO='emily';
   let adPtr=0, adPlays=0, currentAd=null, cardTimer=null, washTimer=null;
   function pickNextAd(){
     adPlays++;
+    if(AD_SOLO){ const solo=ADS.find(a=>a.id===AD_SOLO); if(solo) return solo; }   // strictly this ad only
     if(burnIn && adPlays%4===0) return {kind:'wash', bg:'dark', tune:'wash', dur:9000, fine:''};
     return ADS[adPtr++ % ADS.length];
   }
