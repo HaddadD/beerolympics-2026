@@ -544,11 +544,19 @@
     }catch(e){ console.warn('Bonus sheet unavailable — using base scores only:',e); bonusMap={}; }
   }
 
+  // ── MANUAL OVERRIDES (post-event) — trump whatever the sheet says ──
+  // Player scores by normalized name; team totals by team key. Remove entries to go back to live data.
+  const PLAYER_SCORE_OVERRIDES = { 'EMILY': 1000 };
+  const TEAM_TOTAL_OVERRIDES   = { red: 1106 };
+
   // ── shape the raw API payload into a sorted per-team player list ──
   function teamPlayers(arr,team){
     return (arr||[])
-      .map(p=>({name:String(p&&p.name!=null?p.name:'').trim(),team,
-                score:num(p&&p.pts)+(bonusMap[normName(p&&p.name)]||0)}))
+      .map(p=>{
+        const name=String(p&&p.name!=null?p.name:'').trim();
+        const ov=PLAYER_SCORE_OVERRIDES[normName(name)];
+        return {name,team,score: ov!=null ? ov : num(p&&p.pts)+(bonusMap[normName(name)]||0)};
+      })
       .filter(p=>p.name)
       .sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name));
   }
@@ -700,7 +708,9 @@
     const sum = arr => arr.reduce((t,p)=>t+p.score,0);
     // team totals are the sheet's authoritative numbers (fallback: sum of players)
     const totals = sheetTeamTotals(data,sum(red),sum(white));
-    const redTotal=totals.red, whiteTotal=totals.white;
+    // manual overrides win over the sheet
+    const redTotal   = TEAM_TOTAL_OVERRIDES.red   != null ? TEAM_TOTAL_OVERRIDES.red   : totals.red;
+    const whiteTotal = TEAM_TOTAL_OVERRIDES.white != null ? TEAM_TOTAL_OVERRIDES.white : totals.white;
 
     renderTeam(red,redTotal,{team:'red',label:'RED',totalId:'redTotal',metaId:'redMeta',mvpId:'mvpRed',rowsId:'redRows'},prevState.red);
     renderTeam(white,whiteTotal,{team:'white',label:'WHITE',totalId:'whiteTotal',metaId:'whiteMeta',mvpId:'mvpWhite',rowsId:'whiteRows'},prevState.white);
