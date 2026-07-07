@@ -39,6 +39,8 @@
   body.theme-tie{--page-bg:#f2c200;--frame-col:var(--dark);--title-col:var(--dark);--title-sh:rgba(255,255,255,.55);--on-bg:var(--dark);--muted:rgba(0,0,0,.62)}
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
   html{height:100%}
+  /* hide the mouse cursor after 30s idle (TV/kiosk friendly) */
+  body.cursor-hidden, body.cursor-hidden *{cursor:none!important}
   body{
     position:relative;min-height:100vh;
     font-family:'Press Start 2P','Courier New',monospace;
@@ -73,13 +75,18 @@
 
   /* ── header ── */
   .topbar{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:clamp(6px,1vh,12px)}
-  .titles{display:flex;flex-direction:column;align-items:center;gap:clamp(6px,1vh,12px);padding:0 clamp(40px,5vw,72px)}
+  .titles{display:flex;flex-direction:column;align-items:center;gap:clamp(6px,1vh,12px);padding:0 clamp(46px,7vw,104px)}
   .titles h1{font-size:clamp(15px,2.9vw,38px);color:var(--title-col);text-shadow:2px 2px 0 var(--title-sh);letter-spacing:1px;line-height:1.25}
   .titles .sub{font-size:clamp(8px,1.05vw,13px);color:var(--on-bg);opacity:.75;letter-spacing:2px}
-  .fsbtn{position:absolute;top:0;right:0;display:flex;align-items:center;justify-content:center;width:clamp(34px,3vw,44px);height:clamp(34px,3vw,44px);font-family:inherit;font-size:clamp(13px,1.3vw,18px);line-height:1;cursor:pointer;color:var(--white);background:var(--red);border:3px solid var(--dark);box-shadow:3px 3px 0 rgba(0,0,0,.3)}
-  .fsbtn:hover{background:var(--red-d)}
-  .fsbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(0,0,0,.3)}
-  .status{font-size:clamp(7px,.8vw,10px);letter-spacing:1px;color:var(--muted);white-space:nowrap}
+  .toolbtns{position:absolute;top:0;right:0;display:flex;gap:clamp(6px,.7vw,10px);z-index:6}
+  .iconbtn{display:flex;align-items:center;justify-content:center;width:clamp(34px,3vw,44px);height:clamp(34px,3vw,44px);font-family:inherit;font-size:clamp(13px,1.3vw,18px);line-height:1;cursor:pointer;color:var(--white);background:var(--red);border:3px solid var(--dark);box-shadow:3px 3px 0 rgba(0,0,0,.3)}
+  .iconbtn:hover{background:var(--red-d)}
+  .iconbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(0,0,0,.3)}
+  /* status rides on the water at the bottom of the scene (drawn before the canoe,
+     so the boat sails over it); no z-index → relies on DOM order to stay under the boat */
+  .status{position:absolute;left:50%;transform:translateX(-50%);bottom:clamp(22px,3vh,36px);
+    font-size:clamp(7px,.85vw,11px);letter-spacing:1px;white-space:nowrap;
+    color:var(--white);text-shadow:1px 1px 0 rgba(0,0,0,.6),-1px -1px 0 rgba(0,0,0,.35)}
   .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:#44cc44;margin-right:6px;vertical-align:middle;animation:pulse 2s infinite}
   .dot.fetching{background:#ffaa00;animation:none}
   .dot.error{background:#ff4444;animation:none}
@@ -109,8 +116,10 @@
   .board-top .crown-r{right:clamp(10px,2vw,28px)}
   .board.is-leading .board-top .crown{display:block}
   .bt-name{font-size:clamp(12px,1.6vw,22px);letter-spacing:2px}
+  .bt-figure{display:flex;flex-direction:column;align-items:center}
+  .bt-labels{display:flex;flex-direction:column;align-items:center}
   .bt-total{font-size:clamp(34px,5vw,68px);line-height:1;text-shadow:3px 3px 0 rgba(0,0,0,.35)}
-  .bt-pts{font-size:clamp(7px,.8vw,10px);letter-spacing:3px;opacity:.8;margin-top:-4px}
+  .bt-pts{font-size:clamp(7px,.8vw,10px);letter-spacing:3px;opacity:.8;margin-top:2px}
   .bt-meta{font-size:clamp(7px,.85vw,11px);opacity:.85;letter-spacing:1px;margin-top:4px}
   .leadtag{margin-top:8px;font-size:clamp(7px,.8vw,10px);letter-spacing:2px;background:var(--gold);color:var(--dark);border:3px solid var(--dark);padding:4px 9px;visibility:hidden}
   .board.is-leading .leadtag{visibility:visible}
@@ -151,13 +160,14 @@
   @media (max-width:780px){
     .boards{grid-template-columns:1fr}
     .board{min-height:52vh}
-    .fsbtn{display:none}
+    .toolbtns{display:none}
   }
 
   /* ── fullscreen TV optimizations — fill the screen, keep the boat, big readable scores ── */
   body.is-fullscreen{overflow:hidden;--boat-h:clamp(46px,4.8vw,82px);--boat-bottom:clamp(12px,1.1vw,20px);--lane:clamp(64px,6.4vw,118px)}
   body.is-fullscreen .frame{border-width:clamp(6px,.6vw,10px)}
-  body.is-fullscreen .fsbtn{display:none}
+  body.is-fullscreen .toolbtns{opacity:.32;transition:opacity .2s}
+  body.is-fullscreen .toolbtns:hover{opacity:1}
   body.is-fullscreen .app{height:100vh;gap:clamp(5px,.7vw,10px);overflow:hidden;
     padding:clamp(16px,1.5vw,26px) clamp(14px,1.6vw,30px) var(--lane)}
   body.is-fullscreen .topbar{flex-shrink:0}
@@ -167,13 +177,19 @@
   body.is-fullscreen .leadbar{flex-shrink:0;padding:clamp(6px,1vh,12px) 14px;font-size:clamp(10px,1.3vw,18px)}
   body.is-fullscreen .boards{flex:1;min-height:0}
   body.is-fullscreen .board{overflow:hidden}
-  body.is-fullscreen .board-top{padding:clamp(4px,.55vw,9px) 12px;gap:0}
-  body.is-fullscreen .bt-name{font-size:clamp(11px,1.2vw,18px)}
-  body.is-fullscreen .bt-total{font-size:clamp(24px,2.7vw,42px);text-shadow:2px 2px 0 rgba(0,0,0,.35)}
-  body.is-fullscreen .bt-pts{font-size:clamp(5px,.55vw,7px);margin-top:-1px}
-  body.is-fullscreen .bt-meta{font-size:clamp(5px,.58vw,8px);margin-top:1px}
-  body.is-fullscreen .leadtag{margin-top:3px;font-size:clamp(5px,.58vw,8px);padding:2px 7px}
-  body.is-fullscreen .board-top .crown{font-size:clamp(30px,3.6vw,52px)}
+  /* fullscreen header = centered scoreboard figure: NAME on top, then the big total
+     with its POINTS / N PLAYERS labels stacked beside it, LEADING badge below —
+     everything centered & aligned; crowns flank the leader at the edges */
+  body.is-fullscreen .board-top{flex-direction:column;align-items:center;justify-content:center;
+    gap:clamp(2px,.6vh,7px);padding:clamp(6px,1vh,16px) clamp(54px,6vw,100px)}
+  body.is-fullscreen .bt-name{font-size:clamp(12px,2.3vh,24px);letter-spacing:3px}
+  body.is-fullscreen .bt-figure{flex-direction:row;align-items:center;gap:clamp(8px,1vw,18px)}
+  body.is-fullscreen .bt-total{font-size:clamp(30px,5.4vh,72px);line-height:.9;text-shadow:3px 3px 0 rgba(0,0,0,.35)}
+  body.is-fullscreen .bt-labels{align-items:flex-start;gap:clamp(1px,.3vw,4px)}
+  body.is-fullscreen .bt-pts{font-size:clamp(9px,1.3vh,15px);letter-spacing:2px;opacity:.9;margin:0;text-align:left}
+  body.is-fullscreen .bt-meta{font-size:clamp(8px,1.15vh,14px);letter-spacing:1px;margin:0;text-align:left}
+  body.is-fullscreen .leadtag{margin:clamp(1px,.3vw,4px) 0 0;font-size:clamp(6px,.7vw,10px);padding:3px 10px}
+  body.is-fullscreen .board-top .crown{font-size:clamp(30px,3.6vw,54px)}
   body.is-fullscreen .board-mvp{padding:clamp(3px,.4vw,7px) 12px;gap:clamp(6px,.8vw,14px)}
   body.is-fullscreen .board-mvp .bm-lbl{font-size:clamp(6px,.72vw,10px)}
   body.is-fullscreen .board-mvp .bm-name{font-size:clamp(10px,1.05vw,15px)}
@@ -184,60 +200,141 @@
   body.is-fullscreen .rows{display:flex;flex-direction:column;overflow-y:auto}
   body.is-fullscreen .row{flex:1 1 0;min-height:clamp(14px,2.3vh,38px);padding:0 clamp(12px,1.2vw,20px)}
   body.is-fullscreen .who{flex-wrap:nowrap;overflow:hidden}
-  body.is-fullscreen .rank{font-size:clamp(11px,1.3vw,20px)}
-  body.is-fullscreen .pname{font-size:clamp(11px,1.4vw,22px)}
-  body.is-fullscreen .score{font-size:clamp(14px,1.6vw,28px)}
-  body.is-fullscreen .trophy{font-size:clamp(11px,1.2vw,18px)}
+  body.is-fullscreen .rank{font-size:clamp(10px,1.9vh,20px)}
+  body.is-fullscreen .pname{font-size:clamp(10px,2vh,22px)}
+  body.is-fullscreen .score{font-size:clamp(12px,2.3vh,28px)}
+  body.is-fullscreen .trophy{font-size:clamp(10px,1.8vh,18px)}
   body.is-fullscreen .badge{font-size:clamp(6px,.7vw,10px);padding:3px 6px}
 
-  /* ── deer.supply ad (full-screen only) — fills the entire screen ── */
-  .ad{
-    position:fixed;inset:0;z-index:200;display:none;
-    flex-direction:column;align-items:center;justify-content:center;
-    gap:clamp(8px,1.3vh,18px);padding:4vh 8vw;
-    background:radial-gradient(ellipse at 50% 35%,#3d0000 0%,#110000 55%,#000 100%);
-    overflow:hidden;cursor:pointer;
-  }
-  .ad::before{
-    content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
-    background:repeating-linear-gradient(180deg,transparent 0,transparent 3px,rgba(0,0,0,.18) 3px,rgba(0,0,0,.18) 4px);
-  }
-  .ad::after{
-    content:'';position:absolute;inset:0;z-index:0;pointer-events:none;
-    background:radial-gradient(ellipse at 50% 50%,transparent 40%,rgba(0,0,0,.45) 100%);
-  }
-  .ad.show{display:flex;animation:adIn .6s cubic-bezier(.22,1,.36,1)}
-  @keyframes adIn{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
-  .ad>*{position:relative;z-index:1}
-  .ad-tag{font-family:inherit;font-size:clamp(7px,.72vw,10px);letter-spacing:3px;
-    background:rgba(255,255,255,.1);color:rgba(255,255,255,.5);
-    border:2px solid rgba(255,255,255,.18);padding:5px 14px}
-  .ad-deer{font-size:clamp(60px,10vw,130px);line-height:1;
-    filter:drop-shadow(0 0 20px rgba(255,80,80,.6));
-    animation:deerBounce .9s steps(2) infinite}
-  @keyframes deerBounce{0%{transform:translateY(0) scale(1)}50%{transform:translateY(-18px) scale(1.06)}}
-  .ad-brand{font-size:clamp(32px,6.5vw,88px);color:var(--red);letter-spacing:2px;
-    text-shadow:4px 4px 0 #000,0 0 30px rgba(204,0,0,.7);
-    animation:brandPulse 1.8s ease-in-out infinite}
-  @keyframes brandPulse{0%,100%{text-shadow:4px 4px 0 #000,0 0 20px rgba(204,0,0,.5)}50%{text-shadow:4px 4px 0 #000,0 0 55px rgba(255,30,30,.9),0 0 90px rgba(255,0,0,.25)}}
-  .ad-headline{font-size:clamp(13px,2vw,28px);color:var(--white);line-height:1.75;text-align:center;
-    text-shadow:2px 2px 0 rgba(0,0,0,.9)}
-  .ad-sub{font-size:clamp(8px,.88vw,12px);color:rgba(255,255,255,.7);max-width:min(700px,80vw);
-    line-height:2.1;text-align:center}
-  .ad-points{list-style:none;display:flex;flex-wrap:wrap;gap:6px 24px;justify-content:center;
-    font-size:clamp(7px,.78vw,11px);color:rgba(255,255,255,.8)}
-  .ad-points li::before{content:'✓ ';color:#ff7777}
-  .ad-cta{background:var(--red);color:var(--white);border:5px solid var(--white);
-    padding:clamp(10px,1.3vh,18px) clamp(20px,3vw,46px);
-    font-size:clamp(13px,1.8vw,24px);letter-spacing:2px;
-    box-shadow:6px 6px 0 rgba(0,0,0,.6),0 0 30px rgba(200,0,0,.4);
-    animation:ctaGlow 2s ease-in-out infinite}
-  @keyframes ctaGlow{0%,100%{box-shadow:6px 6px 0 rgba(0,0,0,.6),0 0 20px rgba(200,0,0,.3)}50%{box-shadow:6px 6px 0 rgba(0,0,0,.6),0 0 55px rgba(255,0,0,.8),0 0 100px rgba(255,0,0,.2)}}
-  .ad-fine{font-size:clamp(5px,.52vw,7px);color:rgba(255,255,255,.28);max-width:min(680px,78vw);
-    line-height:1.85;text-align:center}
-  .ad-timer{font-size:clamp(9px,.98vw,13px);color:var(--gold);letter-spacing:3px;
-    animation:timerBlink 1s steps(2) infinite}
-  @keyframes timerBlink{0%,49%{opacity:1}50%,100%{opacity:.3}}
+  /* ── deer.supply — 8-bit VIDEO AD (TV / fullscreen only) ── */
+  @property --belly{syntax:'<length>';inherits:true;initial-value:0px}
+  .ad{position:fixed;inset:0;z-index:200;display:none;cursor:pointer;overflow:hidden;
+    background:radial-gradient(ellipse at 50% 42%,#13245a 0%,#0a1030 55%,#03030c 100%)}
+  .ad.bg-white{background:radial-gradient(ellipse at 50% 42%,#fffdf5 0%,#f4ecd8 68%,#e6d8bd 100%)}
+  .ad.bg-red{background:radial-gradient(ellipse at 50% 42%,#e01414 0%,#8f0000 66%,#360000 100%)}
+  .ad::before{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;
+    background:repeating-linear-gradient(180deg,transparent 0,transparent 2px,rgba(0,0,0,.22) 2px,rgba(0,0,0,.22) 4px)}
+  .ad::after{content:'';position:absolute;inset:0;z-index:3;pointer-events:none;
+    background:radial-gradient(ellipse at 50% 50%,transparent 36%,rgba(0,0,0,.6) 100%);animation:crtFlicker 5s steps(2) infinite}
+  .ad.bg-white::after{background:radial-gradient(ellipse at 50% 50%,transparent 42%,rgba(120,80,20,.22) 100%)}
+  @keyframes crtFlicker{48%{opacity:1}50%{opacity:.86}52%{opacity:1}}
+  .ad.show{display:block;animation:adIn .45s steps(4)}
+  @keyframes adIn{from{opacity:0}to{opacity:1}}
+  .ad-tag{position:absolute;top:clamp(10px,2.2vh,24px);left:50%;transform:translateX(-50%);z-index:4;
+    font-family:inherit;font-size:clamp(7px,.8vw,11px);letter-spacing:4px;color:rgba(255,255,255,.45);
+    background:rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.2);padding:5px 16px}
+
+  /* stage + scenes (one shown at a time, sequenced like a video) */
+  .ad-screen{position:absolute;inset:0;z-index:1}
+  .adscene{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+    gap:clamp(10px,2.4vh,30px);padding:clamp(58px,9vh,108px) 6vw clamp(70px,11vh,120px);text-align:center}
+  .ad[data-scene="intro"] .sc-intro,
+  .ad[data-scene="hero"]  .sc-hero,
+  .ad[data-scene="crowd"] .sc-crowd,
+  .ad[data-scene="cta"]   .sc-cta{display:flex;animation:scenePop .45s cubic-bezier(.22,1,.36,1)}
+  @keyframes scenePop{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:none}}
+
+  /* pixel-art sprites (rendered from a char matrix by JS) */
+  .pix{display:grid;grid-template-columns:repeat(var(--cols),var(--px));grid-auto-rows:var(--px);image-rendering:pixelated}
+  .pix i{width:var(--px);height:var(--px);display:block}
+  .pix-deer{--px:clamp(7px,1.5vw,15px);filter:drop-shadow(4px 5px 0 rgba(0,0,0,.55))}
+  .pix-deer.bounce{animation:deerHop .7s steps(2) infinite}
+  @keyframes deerHop{50%{transform:translateY(calc(var(--px) * -1.3))}}
+  .pix-deer.small{--px:clamp(5px,1vw,10px)}
+
+  /* brand + copy */
+  .ad-brand{font-size:clamp(34px,7vw,92px);color:#ffd23b;letter-spacing:2px;
+    text-shadow:4px 4px 0 #000,0 0 26px rgba(255,180,0,.55);animation:brandPulse 1.5s steps(2) infinite}
+  @keyframes brandPulse{50%{text-shadow:4px 4px 0 #000,0 0 52px rgba(255,214,70,.95)}}
+  .ad-kicker{font-size:clamp(9px,1.35vw,17px);color:#7ad7ff;letter-spacing:3px;line-height:1.9}
+  .ad-cta{background:#ff2b2b;color:#fff;border:5px solid #fff;letter-spacing:2px;
+    padding:clamp(10px,1.7vh,18px) clamp(18px,3vw,44px);font-size:clamp(12px,1.8vw,24px);
+    box-shadow:6px 6px 0 rgba(0,0,0,.6);animation:ctaGlow 1.3s steps(2) infinite}
+  @keyframes ctaGlow{50%{box-shadow:6px 6px 0 rgba(0,0,0,.6),0 0 50px rgba(255,40,40,.9)}}
+
+  /* hero transformation scene */
+  .hero-readout{display:flex;gap:clamp(16px,4vw,64px);font-size:clamp(15px,2.6vw,36px);color:#fff;text-shadow:2px 2px 0 #000}
+  .hero-readout b{color:#ffd23b}
+  .hero-cap{font-size:clamp(9px,1.35vw,17px);color:#7ad7ff;letter-spacing:2px}
+  .ad-track{width:min(60vw,640px);height:clamp(12px,2.2vh,24px);background:#0a1430;border:3px solid #fff;overflow:hidden}
+  .ad-track-fill{height:100%;width:0;background:repeating-linear-gradient(90deg,#3bd16f 0,#3bd16f 10px,#2fae5b 10px,#2fae5b 14px)}
+
+  /* 8-bit person — blocky figure whose belly width animates (high BMI → healthy) */
+  .figure{display:flex;flex-direction:column;align-items:center;--u:clamp(5px,1vw,11px)}
+  /* head, belly and legs all swell with --belly so the whole body clearly goes fat → thin */
+  .figure .f-head{width:calc(var(--u)*3 + var(--belly)*0.32);height:calc(var(--u)*3);background:#f0c89a;
+    box-shadow:inset calc(var(--u)*-0.8) 0 0 rgba(0,0,0,.16),inset 0 calc(var(--u)*-0.5) 0 rgba(0,0,0,.10)}
+  .figure .f-neck{width:var(--u);height:calc(var(--u)*.7);background:#e0b487}
+  .figure .f-torso{width:calc(var(--u)*2.3 + var(--belly));height:calc(var(--u)*3.6);background:#cc2222;
+    box-shadow:inset calc(var(--u)*-0.9) 0 0 rgba(0,0,0,.2),inset 0 calc(var(--u)*0.7) 0 rgba(255,255,255,.08)}
+  .figure .f-legs{display:flex;gap:calc(var(--u) + var(--belly)*0.18)}
+  .figure .f-legs i{width:calc(var(--u) + var(--belly)*0.14);height:calc(var(--u)*2.8);background:#26406e;display:block}
+  .hero-person{--u:clamp(9px,2.3vw,27px)}
+
+  /* crowd results scene */
+  .crowd-row{display:flex;align-items:flex-end;gap:clamp(10px,2.6vw,44px)}
+  .crowd-row .figure{--u:clamp(5px,1.15vw,14px)}
+  .crowd-row .figure.go{animation:slimDown var(--sd,5s) steps(12) forwards}
+  @keyframes slimDown{from{--belly:calc(var(--u)*2.7)}to{--belly:0px}}
+  .big-stat{font-size:clamp(20px,4.2vw,58px);color:#3bd16f;letter-spacing:1px;text-shadow:3px 3px 0 #000}
+  .big-stat b{color:#fff}
+  .crowd-cap{font-size:clamp(9px,1.25vw,16px);color:#7ad7ff;letter-spacing:2px}
+
+  /* fine print + skip timer */
+  .ad-fine{position:absolute;left:50%;transform:translateX(-50%);bottom:clamp(34px,6vh,66px);z-index:4;
+    width:min(88vw,940px);font-size:clamp(5px,.62vw,9px);color:rgba(255,255,255,.34);line-height:1.7;text-align:center}
+  .ad-timer{position:absolute;left:50%;transform:translateX(-50%);bottom:clamp(12px,2.4vh,28px);z-index:4;
+    font-size:clamp(9px,1.1vw,14px);color:#ffd23b;letter-spacing:2px;animation:timerBlink 1s steps(2) infinite}
+  @keyframes timerBlink{50%{opacity:.35}}
+
+  /* which ad "program" is showing */
+  .ad:not([data-ad="deerfx"]) .ad-screen{display:none}
+  .ad-card{position:absolute;inset:0;z-index:1;display:none;align-items:center;justify-content:center;padding:clamp(58px,9vh,108px) 6vw clamp(70px,11vh,120px)}
+  .ad[data-ad="card"] .ad-card{display:flex}
+  .ad-wash{position:absolute;inset:0;z-index:2;display:none;align-items:center;justify-content:center;background:#fff}
+  .ad[data-ad="wash"] .ad-wash{display:flex}
+
+  /* generic card ad — sprite + brand + cycling tagline, gently DRIFTING for burn-in */
+  .card-inner{display:flex;flex-direction:column;align-items:center;text-align:center;
+    gap:clamp(8px,2vh,26px);animation:adDrift 11s ease-in-out infinite}
+  .ad.burnin .card-inner{animation-duration:6.5s}
+  .ad.burnin .ad-screen{animation:adDrift 8s ease-in-out infinite}
+  @keyframes adDrift{0%{transform:translate(-4vw,-3vh)}25%{transform:translate(4vw,-2vh)}50%{transform:translate(3vw,3vh)}75%{transform:translate(-3vw,2vh)}100%{transform:translate(-4vw,-3vh)}}
+  .card-sprite{--px:clamp(6px,1.4vw,14px);filter:drop-shadow(4px 5px 0 rgba(0,0,0,.4));animation:deerHop .7s steps(2) infinite}
+  .card-brand{font-size:clamp(30px,6.4vw,86px);letter-spacing:2px;line-height:1;text-shadow:4px 4px 0 rgba(0,0,0,.35);animation:brandPulse 1.5s steps(2) infinite}
+  .card-sub{font-size:clamp(11px,1.8vw,24px);letter-spacing:3px}
+  .card-line{font-size:clamp(15px,3vw,40px);letter-spacing:1px;line-height:1.3;min-height:1.3em;animation:linePop .5s cubic-bezier(.22,1,.36,1)}
+  @keyframes linePop{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+  .card-cta{margin-top:clamp(4px,1vh,10px);font-size:clamp(12px,1.8vw,24px);letter-spacing:2px;
+    border:5px solid;padding:clamp(9px,1.5vh,16px) clamp(16px,3vw,40px);box-shadow:6px 6px 0 rgba(0,0,0,.5)}
+  /* dark-bg card colors */
+  .ad.bg-dark .card-sub{color:#7ad7ff}
+  .ad.bg-dark .card-line{color:#fff;text-shadow:2px 2px 0 #000}
+  .ad.bg-dark .card-cta{background:#ff2b2b;color:#fff;border-color:#fff}
+  /* white-bg card colors */
+  .ad.bg-white .card-sub{color:#0a7d78}
+  .ad.bg-white .card-line{color:#181818}
+  .ad.bg-white .card-cta{background:#cc0000;color:#fff;border-color:#181818}
+  .ad.bg-white .ad-tag{color:rgba(0,0,0,.45);border-color:rgba(0,0,0,.2);background:rgba(255,255,255,.5)}
+  .ad.bg-white .ad-fine{color:rgba(0,0,0,.42)}
+  .ad.bg-white .ad-timer{color:#a8730a}
+  /* red-bg card colours (propaganda / China) */
+  .ad.bg-red .card-sub{color:#ffe98a}
+  .ad.bg-red .card-line{color:#fff;text-shadow:2px 2px 0 rgba(0,0,0,.5)}
+  .ad.bg-red .card-cta{background:#111;color:#fff;border-color:#fff}
+  .ad.bg-red .ad-tag{color:rgba(255,255,255,.5);border-color:rgba(255,255,255,.28);background:rgba(0,0,0,.22)}
+  .ad.bg-red .ad-fine{color:rgba(255,255,255,.5)}
+  .ad.bg-red .ad-timer{color:#ffe98a}
+
+  /* pixel-refresh wash — cycles solid colours + a sweeping band to exercise every pixel */
+  .ad-wash::before{content:'';position:absolute;inset:0;
+    background:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.55) 50%,transparent 58%);animation:washBand 1.2s linear infinite}
+  @keyframes washBand{from{transform:translateX(-70%)}to{transform:translateX(70%)}}
+  .wash-label{position:relative;font-size:clamp(16px,3.2vw,42px);letter-spacing:4px;color:#fff;mix-blend-mode:difference}
+
+  /* burn-in toggle button: lit green when active */
+  .iconbtn.on{background:#2ecc40;color:#08210f;border-color:#08210f}
+  .iconbtn.on:hover{background:#28b638}
 
   /* ── animations & motion polish ── */
   .row{position:relative}
@@ -280,6 +377,8 @@
 <body>
   <div class="scene">
     <div class="ground"></div>
+    <!-- live status sits on the water; the canoe (next sibling) runs over it -->
+    <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Loading…</span></div>
     <div class="canoe"><img src="Canoe.png" alt=""></div>
   </div>
   <div class="frame"></div>
@@ -287,11 +386,14 @@
   <div class="app">
     <!-- HEADER -->
     <div class="topbar">
-      <button class="fsbtn" id="fsBtn" title="Full screen" aria-label="Full screen">⛶</button>
+      <div class="toolbtns">
+        <button class="iconbtn burnbtn" id="burnBtn" title="Reduce burn-in (run ads often)" aria-label="Reduce burn-in">⟳</button>
+        <button class="iconbtn adbtn" id="adBtn" title="Play ad now" aria-label="Play ad now">▶</button>
+        <button class="iconbtn fsbtn" id="fsBtn" title="Full screen" aria-label="Full screen">⛶</button>
+      </div>
       <div class="titles">
         <h1>2026 CANADA DAY BEEROLYMPICS</h1>
         <div class="sub">🍁 LIVE TEAM LEADERBOARD 🍁</div>
-        <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Loading…</span></div>
       </div>
     </div>
 
@@ -306,9 +408,13 @@
           <div class="crown crown-l">👑</div>
           <div class="crown crown-r">👑</div>
           <div class="bt-name">RED TEAM</div>
-          <div class="bt-total" id="redTotal">—</div>
-          <div class="bt-pts">POINTS</div>
-          <div class="bt-meta" id="redMeta">— PLAYERS</div>
+          <div class="bt-figure">
+            <div class="bt-total" id="redTotal">—</div>
+            <div class="bt-labels">
+              <div class="bt-pts">POINTS</div>
+              <div class="bt-meta" id="redMeta">— PLAYERS</div>
+            </div>
+          </div>
           <div class="leadtag">👑 LEADING</div>
         </div>
         <div class="board-mvp" id="mvpRed"><span class="bm-lbl">🏆 RED MVP</span><span class="bm-name">—</span></div>
@@ -322,9 +428,13 @@
           <div class="crown crown-l">👑</div>
           <div class="crown crown-r">👑</div>
           <div class="bt-name">WHITE TEAM</div>
-          <div class="bt-total" id="whiteTotal">—</div>
-          <div class="bt-pts">POINTS</div>
-          <div class="bt-meta" id="whiteMeta">— PLAYERS</div>
+          <div class="bt-figure">
+            <div class="bt-total" id="whiteTotal">—</div>
+            <div class="bt-labels">
+              <div class="bt-pts">POINTS</div>
+              <div class="bt-meta" id="whiteMeta">— PLAYERS</div>
+            </div>
+          </div>
           <div class="leadtag">👑 LEADING</div>
         </div>
         <div class="board-mvp" id="mvpWhite"><span class="bm-lbl">🏆 WHITE MVP</span><span class="bm-name">—</span></div>
@@ -334,22 +444,59 @@
     </div>
   </div>
 
-  <!-- DEER.SUPPLY AD (full-screen only) -->
-  <div class="ad" id="adOverlay">
+  <!-- 8-bit ads (TV / fullscreen only): rotating deer.supply + Justin's Slippery Throat -->
+  <div class="ad" id="adOverlay" data-ad="deerfx" data-scene="intro">
     <div class="ad-tag">ADVERTISEMENT</div>
-    <div class="ad-deer">🦌</div>
-    <div class="ad-brand">deer.supply</div>
-    <div class="ad-headline">SHED THE WEIGHT.<br>KEEP THE CHEER. 🍺🍁</div>
-    <div class="ad-sub">Doctor-prescribed GLP-1 weight-loss medication, delivered discreetly to your door across Canada. No clinic line-ups. No judgment. Just results between Beerolympics.</div>
-    <ul class="ad-points">
-      <li>Online doctor visit</li>
-      <li>Meds shipped free</li>
-      <li>Licensed CDN pharmacy</li>
-      <li>Cancel anytime</li>
-    </ul>
-    <div class="ad-cta">START TODAY → deer.supply</div>
-    <div class="ad-fine">Prescription medication requires a medical assessment and is not suitable for everyone. Use only as directed by a licensed clinician. deer.supply is a fictional sponsor shown for this event display.</div>
-    <div class="ad-timer" id="adTimer">CLOSES IN 30S</div>
+    <div class="ad-screen" id="adScreen">
+
+      <!-- SCENE 1 · intro -->
+      <div class="adscene sc-intro">
+        <div class="pix pix-deer" id="pixDeer"></div>
+        <div class="ad-brand">deer.supply</div>
+        <div class="ad-kicker">RETA-DEER™ · TRIPLE-HORMONE WEIGHT LOSS</div>
+      </div>
+
+      <!-- SCENE 2 · hero transformation over 18 months -->
+      <div class="adscene sc-hero">
+        <div class="hero-readout"><span>BMI <b id="bmiNum">38</b></span><span>MONTH <b id="moNum">0</b> / 18</span></div>
+        <div id="heroPerson"></div>
+        <div class="ad-track"><div class="ad-track-fill" id="trackFill"></div></div>
+        <div class="hero-cap">18 MONTHS ON RETA-DEER™</div>
+      </div>
+
+      <!-- SCENE 3 · crowd results -->
+      <div class="adscene sc-crowd">
+        <div class="crowd-row" id="crowdRow"></div>
+        <div class="big-stat"><b id="lossNum">0</b>% BODY WEIGHT GONE*</div>
+        <div class="crowd-cap">*highest-dose retatrutide clinical results</div>
+      </div>
+
+      <!-- SCENE 4 · call to action -->
+      <div class="adscene sc-cta">
+        <div class="pix pix-deer small" id="pixDeerCta"></div>
+        <div class="ad-brand">deer.supply</div>
+        <div class="ad-cta">ASK YOUR DOCTOR ABOUT RETA-DEER™</div>
+        <div class="ad-kicker">SHED THE WEIGHT · KEEP THE CHEER 🍺🍁</div>
+      </div>
+
+    </div>
+
+    <!-- generic card ad (deer.supply variants + Justin's Slippery Throat) -->
+    <div class="ad-card" id="adCard">
+      <div class="card-inner">
+        <div class="pix card-sprite" id="cardSprite"></div>
+        <div class="card-brand"></div>
+        <div class="card-sub"></div>
+        <div class="card-line"></div>
+        <div class="card-cta"></div>
+      </div>
+    </div>
+
+    <!-- pixel-refresh wash (burn-in mode) -->
+    <div class="ad-wash" id="adWash"><div class="wash-label">PIXEL REFRESH</div></div>
+
+    <div class="ad-fine" id="adFine"></div>
+    <div class="ad-timer" id="adTimer">CLOSES IN 30S · TAP OR PRESS SPACE TO SKIP</div>
   </div>
 
 <script>
@@ -397,17 +544,50 @@
     }catch(e){ console.warn('Bonus sheet unavailable — using base scores only:',e); bonusMap={}; }
   }
 
+  // ── MANUAL OVERRIDES (post-event) — trump whatever the sheet says ──
+  // Player scores by normalized name; team totals by team key. Remove entries to go back to live data.
+  const PLAYER_SCORE_OVERRIDES = { 'EMILY': 1000 };
+  const TEAM_TOTAL_OVERRIDES   = { red: 1106 };
+
   // ── shape the raw API payload into a sorted per-team player list ──
   function teamPlayers(arr,team){
     return (arr||[])
-      .map(p=>({name:String(p&&p.name!=null?p.name:'').trim(),team,
-                score:num(p&&p.pts)+(bonusMap[normName(p&&p.name)]||0)}))
+      .map(p=>{
+        const name=String(p&&p.name!=null?p.name:'').trim();
+        const ov=PLAYER_SCORE_OVERRIDES[normName(name)];
+        return {name,team,score: ov!=null ? ov : num(p&&p.pts)+(bonusMap[normName(name)]||0)};
+      })
       .filter(p=>p.name)
       .sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name));
   }
 
+  // ── TEAM TOTALS come DIRECTLY from the Google Sheet (winnerPts/loserPts) ──
+  // A team can earn points without crediting any individual player, so the sheet's
+  // team number can be GREATER than the sum of player scores. The winner/loser
+  // fields are mapped to red/white by which team name contains "red"/"white".
+  // Player-score sums are used only as a fallback when the sheet omits a number.
+  function sheetTeamTotals(data,sumRed,sumWhite){
+    const wName=String(data&&data.winnerName!=null?data.winnerName:'').toLowerCase();
+    const lName=String(data&&data.loserName !=null?data.loserName :'').toLowerCase();
+    const has=v=>v!=null&&String(v).trim()!=='';
+    const wPts=has(data&&data.winnerPts)?num(data.winnerPts):null;
+    const lPts=has(data&&data.loserPts )?num(data.loserPts ):null;
+    let red=null, white=null;
+    if(wName.includes('red')||lName.includes('white')){ red=wPts; white=lPts; }
+    else if(wName.includes('white')||lName.includes('red')){ white=wPts; red=lPts; }
+    return { red: red!=null?red:sumRed, white: white!=null?white:sumWhite };
+  }
+
   // remembered state between refreshes (for change/rank animations)
   let prevState={red:null,white:null}, prevLeader=null;
+  // latest shaped player lists, so ads can look up a live score by name
+  let lastTeams=null;
+  function playerScore(name){
+    if(!lastTeams) return null;
+    const n=normName(name);
+    const p=lastTeams.red.concat(lastTeams.white).find(x=>normName(x.name)===n);
+    return p?p.score:null;
+  }
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion:reduce)').matches;
 
   // tween a number element up/down (counts from 0 on first paint of the team totals)
@@ -524,14 +704,19 @@
   function render(data){
     const red   = teamPlayers(data.redPlayers,'red');
     const white = teamPlayers(data.whitePlayers,'white');
+    lastTeams = {red, white};   // expose live scores to the ads
     const sum = arr => arr.reduce((t,p)=>t+p.score,0);
-    const redTotal=sum(red), whiteTotal=sum(white);
+    // team totals are the sheet's authoritative numbers (fallback: sum of players)
+    const totals = sheetTeamTotals(data,sum(red),sum(white));
+    // manual overrides win over the sheet
+    const redTotal   = TEAM_TOTAL_OVERRIDES.red   != null ? TEAM_TOTAL_OVERRIDES.red   : totals.red;
+    const whiteTotal = TEAM_TOTAL_OVERRIDES.white != null ? TEAM_TOTAL_OVERRIDES.white : totals.white;
 
     renderTeam(red,redTotal,{team:'red',label:'RED',totalId:'redTotal',metaId:'redMeta',mvpId:'mvpRed',rowsId:'redRows'},prevState.red);
     renderTeam(white,whiteTotal,{team:'white',label:'WHITE',totalId:'whiteTotal',metaId:'whiteMeta',mvpId:'mvpWhite',rowsId:'whiteRows'},prevState.white);
     prevState.red=snapshot(red); prevState.white=snapshot(white);
 
-    // ── who's winning (sum of player scores) ──
+    // ── who's winning (team totals from the sheet) ──
     const boardRed=document.getElementById('boardRed'), boardWhite=document.getElementById('boardWhite');
     const leadBar=document.getElementById('leadBar');
     boardRed.classList.remove('is-leading'); boardWhite.classList.remove('is-leading');
@@ -575,36 +760,557 @@
   refresh();
   setInterval(refresh,REFRESH_MS);
 
+  // ── auto-reload the page when a new build is deployed to Vercel ──
+  // Polls THIS document's ETag/Last-Modified (Vercel changes it on every deploy) and
+  // reloads when it differs from the version currently running — so the TV picks up
+  // design changes on its own. Waits out an active ad first. No manual version bumping.
+  const DEPLOY_CHECK_MS = 60000;
+  let deployTag = null;
+  // circuit breaker: if something (e.g. flapping ETags) tries to reload over and over,
+  // stop auto-reloading so the TV can't get stuck in a reload loop. Counts across reloads
+  // via sessionStorage (resets when the tab is closed/reopened).
+  function safeReload(){
+    try{
+      const now=Date.now();
+      const recent=(JSON.parse(sessionStorage.getItem('bo_rl')||'[]')).filter(t=>now-t<600000);
+      recent.push(now); sessionStorage.setItem('bo_rl',JSON.stringify(recent));
+      if(recent.length>6){ console.warn('[beerolympics] auto-reload paused: too many reloads in 10 min'); return; }
+    }catch(e){}
+    location.reload();
+  }
+  async function checkForUpdate(){
+    try{
+      const res = await fetch(location.pathname+'?_v='+Date.now(),{method:'HEAD',cache:'no-store'});
+      if(!res.ok) return;
+      const tag = res.headers.get('etag')||res.headers.get('last-modified')||res.headers.get('content-length');
+      if(!tag) return;
+      if(deployTag===null){ deployTag=tag; return; }          // first sample = running version
+      if(tag!==deployTag){                                     // a new build is live
+        if(typeof adShowing==='function' && adShowing()) window.__reloadPending=true; // reload after the ad
+        else safeReload();
+      }
+    }catch(e){ /* offline / transient — retry next tick */ }
+  }
+  checkForUpdate();
+  setInterval(checkForUpdate, DEPLOY_CHECK_MS);
+
   // ── full-screen mode + deer.supply ad scheduler ──
   const AD_EVERY=5*60*1000, AD_DUR=30*1000;
   let adInterval=null, adTimeout=null, adTick=null;
   const adEl=()=>document.getElementById('adOverlay');
   const adShowing=()=>adEl().classList.contains('show');
-  function showAd(){
-    const o=adEl(); o.classList.add('show');
-    let left=AD_DUR/1000; const t=document.getElementById('adTimer');
-    const tick=()=>{ t.textContent='CLOSES IN '+Math.max(0,left)+'S · TAP OR PRESS SPACE TO SKIP'; };
-    tick();
-    clearInterval(adTick);
-    adTick=setInterval(()=>{ left--; tick(); if(left<=0)clearInterval(adTick); },1000);
-    clearTimeout(adTimeout); adTimeout=setTimeout(hideAd,AD_DUR);
+  // ── pixel-art sprite renderer: map = array of equal-length strings, pal = {char:color} ──
+  function buildSprite(host,map,pal){
+    if(!host) return;
+    host.style.setProperty('--cols',map[0].length);
+    let html='';
+    for(const row of map) for(const ch of row)
+      html += (ch===' '||ch==='.') ? '<i></i>' : '<i style="background:'+(pal[ch]||'#000')+'"></i>';
+    host.innerHTML=html;
   }
-  function hideAd(){ adEl().classList.remove('show'); clearTimeout(adTimeout); clearInterval(adTick); }
+  const DEER_PAL={B:'#7a4a22',L:'#a06d36',T:'#c99a57',K:'#120a04',N:'#2c1a0c',W:'#f3e7d2'};
+  const DEER=[
+    "....T.....T....",
+    "...T.T...T.T...",
+    "....TT...TT....",
+    ".....T...T.....",
+    ".........BBB...",
+    "........BBBBB..",
+    "........BLLKB..",
+    "........BLLNN..",
+    "...BBBBBBBBB...",
+    ".WBBBBBBBBBB...",
+    ".BBBBBBBBBBB...",
+    ".BBBBBBBBBB....",
+    ".BB..BB.BB.B...",
+    ".B...B..B..B...",
+    ".N...N..N..N...",
+  ];
+  // 8-bit bottle sprite for Justin's Slippery Throat
+  const BOTTLE_PAL={C:'#20201f',G:'#2ec7c2',D:'#1b8f8b',L:'#f3e7d2',H:'#ffffff'};
+  const BOTTLE=[
+    "....CCC....",
+    "....CCC....",
+    "....GGG....",
+    "...GGGGG...",
+    "..GGGGGGG..",
+    ".GGGGGGGGG.",
+    ".GHGGGGGGD.",
+    ".GLLLLLLLD.",
+    ".GLLLLLLLD.",
+    ".GLLLLLLLD.",
+    ".GHGGGGGGD.",
+    ".GGGGGGGGD.",
+    ".GGGGGGGGD.",
+    ".DGGGGGGDD.",
+    "..DDDDDDD..",
+    "...DDDDD...",
+  ];
+  const TROPHY_PAL={G:'#ffcc33',D:'#8a6d00'};
+  const TROPHY=[
+    ".GGGGGGGGG.",
+    "GGGGGGGGGGG",
+    "G.GGGGGGG.G",
+    "G.GGGGGGG.G",
+    "GGGGGGGGGGG",
+    ".GGGGGGGGG.",
+    ".GGGGGGGGG.",
+    "..GGGGGGG..",
+    "...GGGGG...",
+    "....GGG....",
+    "....GGG....",
+    "...GGGGG...",
+    "..DDDDDDD..",
+    ".DDDDDDDDD.",
+  ];
+  const STAR_PAL={S:'#ffd23b'};
+  const STAR=[
+    "......S......",
+    ".....SSS.....",
+    ".....SSS.....",
+    "SSSSSSSSSSSSS",
+    ".SSSSSSSSSSS.",
+    "..SSSSSSSSS..",
+    "...SSSSSSS...",
+    "...SSSSSSS...",
+    "..SSSS.SSSS..",
+    ".SSS.....SSS.",
+    ".SS.......SS.",
+    "S...........S",
+  ];
+  const HEART_PAL={H:'#ffffff'};
+  const HEART=[
+    "..HHH...HHH..",
+    ".HHHHH.HHHHH.",
+    "HHHHHHHHHHHHH",
+    "HHHHHHHHHHHHH",
+    "HHHHHHHHHHHHH",
+    ".HHHHHHHHHHH.",
+    "..HHHHHHHHH..",
+    "...HHHHHHH...",
+    "....HHHHH....",
+    ".....HHH.....",
+    "......H......",
+  ];
+  const BALLOT_PAL={B:'#204a9c',W:'#f3e7d2',K:'#cc1111'};
+  const BALLOT=[
+    ".....WWW.....",
+    ".....W.W.....",
+    ".....WKW.....",
+    "...BBBBBBB...",
+    "..BBBBBBBBB..",
+    ".BBBBBBBBBBB.",
+    ".B.........B.",
+    ".B.........B.",
+    ".B.........B.",
+    ".B.........B.",
+    ".B.........B.",
+    ".BBBBBBBBBBB.",
+    "..BBBBBBBBB..",
+  ];
+  const MUG_PAL={F:'#ffffff',B:'#f5a623',D:'#c77f00',G:'#ffe9b0'};
+  const MUG=[
+    "..FFFFFFFF...",
+    ".FFFFFFFFFF..",
+    ".FFFFFFFFF...",
+    ".BBBBBBBBB...",
+    ".BGBBBBBBBDD.",
+    ".BGBBBBBBBD.D",
+    ".BGBBBBBBBD.D",
+    ".BGBBBBBBBD.D",
+    ".BGBBBBBBBDD.",
+    ".BBBBBBBBBD..",
+    ".BBBBBBBBB...",
+    ".DDDDDDDDD...",
+  ];
+  // rescued white iPhone (heart on screen, water droplets) for Emily's ad
+  const PHONE_PAL={W:'#f2f0ea',K:'#101418',H:'#ff4d6d',D:'#4db3ff',G:'#8a8f98'};
+  const PHONE=[
+    "..D......D.",
+    ".....D.....",
+    ".WWWWWWWWW.",
+    ".WGWWWWWWW.",
+    ".WKKKKKKKW.",
+    ".WKHHKHHKW.",
+    ".WKHHHHHKW.",
+    ".WKKHHHKKW.",
+    ".WKKKHKKKW.",
+    ".WKKKKKKKW.",
+    ".WKKKKKKKW.",
+    ".WWWWWWWWW.",
+  ];
+  const SKULL_PAL={S:'#e8e0cc',K:'#141414'};
+  const SKULL=[
+    "..SSSSSSS..",
+    ".SSSSSSSSS.",
+    "SSSSSSSSSSS",
+    "SSKKSSSKKSS",
+    "SSKKSSSKKSS",
+    "SSSSSKSSSSS",
+    "SSSSSSSSSSS",
+    ".SSSSSSSSS.",
+    ".SKSKSKSKS.",
+    "..SSSSSSS..",
+    "...S.S.S...",
+  ];
+  function makeFigure(){
+    const f=document.createElement('div'); f.className='figure';
+    f.innerHTML='<div class="f-head"></div><div class="f-neck"></div><div class="f-torso"></div><div class="f-legs"><i></i><i></i></div>';
+    return f;
+  }
+  let adBuilt=false, heroFig=null, crowdFigs=[];
+  function buildAd(){
+    if(adBuilt) return; adBuilt=true;
+    buildSprite(document.getElementById('pixDeer'),DEER,DEER_PAL);
+    buildSprite(document.getElementById('pixDeerCta'),DEER,DEER_PAL);
+    heroFig=makeFigure(); heroFig.classList.add('hero-person');
+    document.getElementById('heroPerson').appendChild(heroFig);
+    const crowd=document.getElementById('crowdRow'); crowd.innerHTML=''; crowdFigs=[];
+    for(let i=0;i<5;i++){ const g=makeFigure(); crowd.appendChild(g); crowdFigs.push(g); }
+  }
+
+  // ── 30s scene timeline (plays like a video segment) ──
+  const SCENES=[['intro',0],['hero',4.5],['crowd',15],['cta',23.5]];
+  let adRAF=null, adStart=0;
+  function onSceneEnter(scene){
+    if(scene==='intro') document.getElementById('pixDeer').classList.add('bounce');
+    if(scene==='hero') heroFig.style.setProperty('--belly','calc(var(--u) * 3)');
+    if(scene==='crowd') crowdFigs.forEach((g,i)=>{ g.classList.remove('go'); void g.offsetWidth;
+      g.style.setProperty('--sd','5s'); g.style.animationDelay=(i*0.45)+'s'; g.classList.add('go'); });
+  }
+  function adFrame(now){
+    if(!adShowing()) return;
+    const t=(now-adStart)/1000;
+    let scene='intro'; for(const [n,st] of SCENES) if(t>=st) scene=n;
+    const ad=adEl();
+    if(ad.dataset.scene!==scene){ ad.dataset.scene=scene; onSceneEnter(scene); }
+    if(scene==='hero'){
+      const k=Math.min(1,Math.max(0,(t-4.5)/9.5));     // ramp over the hero window
+      document.getElementById('bmiNum').textContent=Math.round(38-14*k);   // 38 → 24
+      document.getElementById('moNum').textContent=Math.round(18*k);       // 0 → 18 months
+      document.getElementById('trackFill').style.width=(k*100)+'%';
+      heroFig.style.setProperty('--belly','calc(var(--u) * '+(3*(1-k)).toFixed(3)+')');  // fat (3u) → thin (0)
+    }else if(scene==='crowd'){
+      const k=Math.min(1,Math.max(0,(t-15)/6.5));
+      document.getElementById('lossNum').textContent=Math.round(24*k);     // 0 → 24%
+    }
+    if(t<31) adRAF=requestAnimationFrame(adFrame);
+  }
+
+  // ── ad catalog: rotates deer.supply variants + Justin's Slippery Throat; some white-bg ──
+  let burnIn=false;
+  const DEER_FINE='Dramatization based on published retatrutide clinical-trial data (a GLP-1 / GIP / glucagon receptor agonist; highest-dose participants lost roughly a quarter of their body weight over ~72 weeks). deer.supply & RETA-DEER™ are a FICTIONAL sponsor shown purely for entertainment — not a real product and not medical advice.';
+  const JUSTIN_FINE="Justin's Slippery Throat™ is a FICTIONAL party sponsor shown purely for entertainment on Canada Day — not a real product. Please drink responsibly.";
+  const BRIAN_FINE="A loving Beerolympics tribute to Brian, Team White's finest. Statistically the greatest — probably. All in good fun.";
+  const VIC_FINE="A heartfelt Beerolympics tribute to Vic, the beating heart of Team White. Numbers can't measure vibes — but we printed hers anyway. We love you, Vic.";
+  const EMILY_FINE="Dramatization of real events. One (1) iPhone 17 Pro Max (512GB, White) was recovered from the depths in a daring solo dive. Justin owes Emily forever. Jasper was lovingly supervised throughout and napped like a champion.";
+  const YAVEXIT_FINE="A satirical Beerolympics referendum. Yavuz remains deeply beloved and is going absolutely nowhere. No actual votes will be counted. Paid for by Citizens for a Slightly Smaller White Team.";
+  const PROP_FINE="A morale-boosting Beerolympics dispatch in vintage-poster style — all in good fun, and especially for you, Brian.";
+  const CHINA_FINE="An absurdist Beerolympics interlude, not a geopolitical statement of any kind. China is #1 in this ad only.";
+  const REDTRUST_FINE="A satirical attack ad. Red Team is genuinely great and completely trustworthy. Paid for by Team White in Monopoly money — all in good fun.";
+  const ADS=[
+    {kind:'deerfx', bg:'dark', tune:'deer', fine:DEER_FINE},
+    {kind:'card', bg:'white', tune:'deer', sprite:DEER, pal:DEER_PAL, px:'clamp(6px,1.4vw,15px)',
+      accent:'#cc0000', brand:'deer.supply', sub:'RETA-DEER™ · WEIGHT LOSS',
+      lines:['SHED THE WEIGHT.','KEEP THE CHEER. 🍺','DELIVERED TO YOUR DOOR','NO CLINIC LINE-UPS'],
+      cta:'ASK YOUR DOCTOR → deer.supply', fine:DEER_FINE},
+    {kind:'card', bg:'dark', tune:'justin', sprite:BOTTLE, pal:BOTTLE_PAL, px:'clamp(8px,1.7vw,17px)',
+      accent:'#3ee0da', brand:"JUSTIN'S", sub:'SLIPPERY THROAT™',
+      lines:['SLIDES DOWN SMOOTH','CHUG LIKE A CHAMPION','NEVER FEAR THE FOAM','ONE SIP · ALL GULP'],
+      cta:'GET SLIPPERY → justins.throat', fine:JUSTIN_FINE},
+    {kind:'card', bg:'white', tune:'justin', sprite:BOTTLE, pal:BOTTLE_PAL, px:'clamp(8px,1.7vw,17px)',
+      accent:'#0a8f8a', brand:"JUSTIN'S", sub:'SLIPPERY THROAT™',
+      lines:['THE OFFICIAL CHUG FUEL','SMOOTHER EVERY ROUND','BEAT THE BURN 🔥','CANADA DAY APPROVED 🍁'],
+      cta:'GET SLIPPERY → justins.throat', fine:JUSTIN_FINE},
+
+    {kind:'card', bg:'white', tune:'victory', sprite:TROPHY, pal:TROPHY_PAL, px:'clamp(9px,1.9vw,19px)',
+      accent:'#c8a200', brand:'BRIAN #1', sub:'TEAM WHITE LEGEND',
+      lines:['THE GOAT OF THE GARAGE',
+             ()=>{ const s=playerScore('Brian'); return (s!=null?s:'∞')+' POINTS OF PURE HEAT'; },
+             'MVP · UNANIMOUS','THE PRIDE OF WHITE','BOW TO BRIAN 👑'],
+      cta:'ALL HAIL BRIAN', fine:BRIAN_FINE},
+
+    {kind:'card', bg:'dark', tune:'victory', sprite:MUG, pal:MUG_PAL, px:'clamp(9px,1.9vw,19px)',
+      accent:'#ffd23b', brand:'WE ❤ VIC', sub:'TEAM WHITE MVP',
+      lines:['THE PEOPLE\'S CHAMPION',
+             ()=>{ const s=playerScore('Vic'); return s!=null ? s+' POINTS OF PURE CLASS' : 'POINTS? COUNTLESS.'; },
+             'STEADY HANDS · STEADIER HEART','THE GLUE OF TEAM WHITE','VIC HAPPENS ONCE A GENERATION'],
+      cta:'WE LOVE YOU VIC 🍺', fine:VIC_FINE},
+
+    {kind:'card', bg:'white', tune:'anthem', sprite:BALLOT, pal:BALLOT_PAL, px:'clamp(8px,1.7vw,17px)',
+      accent:'#204a9c', brand:'YAVEXIT', sub:'A TEAM WHITE REFERENDUM',
+      lines:['SHOULD YAVUZ REMAIN?','☐ OUI      ☑ NON','ONE TEAM · ONE DESTINY','FREE TEAM WHITE','POLLS CLOSE AT DUSK'],
+      cta:'VOTE NON → YAVEXIT', fine:YAVEXIT_FINE},
+
+    {kind:'card', bg:'red', tune:'anthem', sprite:HEART, pal:HEART_PAL, px:'clamp(9px,1.9vw,18px)',
+      accent:'#ffffff', brand:'TEAM WHITE', sub:'WE LOVE YOU',
+      lines:['YOUR TEAM NEEDS YOU!','WE CAN DO IT! 💪','FOR VICTORY · FOR WHITE','ESPECIALLY YOU, BRIAN','LOOSE LIPS LOSE POINTS'],
+      cta:'ENLIST IN TEAM WHITE', fine:PROP_FINE},
+
+    {kind:'card', bg:'red', tune:'anthem', sprite:STAR, pal:STAR_PAL, px:'clamp(9px,1.9vw,18px)',
+      accent:'#ffd23b', brand:'CHINA #1', sub:'NUMBER ONE SUPER GUY',
+      lines:['CHINA NUMBER ONE!','EVERYONE ELSE: NUMBER TWO','UNLIMITED POWER','GREAT WALL OF CHUGS','ACCEPT NO SUBSTITUTE'],
+      cta:'CHINA #1 🥇', fine:CHINA_FINE},
+
+    {kind:'card', bg:'dark', tune:'anthem', sprite:SKULL, pal:SKULL_PAL, px:'clamp(9px,1.9vw,18px)',
+      accent:'#ff3b3b', brand:'RED TEAM?', sub:'CAN THEY BE TRUSTED?',
+      lines:['WHAT ARE THEY HIDING?','SHAKY POURS · SHAKIER MORALS','THE FOAM NEVER LIES','ASK YOURSELF: WHY RED?','THEY SKIPPED LEG DAY'],
+      cta:'PAID FOR BY TEAM WHITE', fine:REDTRUST_FINE},
+
+    {id:'emily', kind:'card', bg:'dark', tune:'victory', sprite:PHONE, pal:PHONE_PAL, px:'clamp(9px,1.9vw,19px)',
+      accent:'#ff4d6d', brand:'SAINT EMILY', sub:'TEAM RED · TOP MVP',
+      lines:['ONE LAKE. ONE PHONE. ONE MOM.',
+             ()=>{ const s=playerScore('Emily'); return (s!=null?s:'1000')+' POINTS · ONE LEGEND'; },
+             'SHE DIVES. SHE SAVES. SHE MOMS.',
+             'RESCUED: iPHONE 17 PRO MAX · 512GB · WHITE',
+             'ZERO CASUALTIES · FULL BATTERY',
+             'RETRIEVES. RESTORES. RAISES JASPER.',
+             'THE ONLY WATERPROOF THING AT BEEROLYMPICS',
+             'JASPER NAPPED. LEGENDS DON\'T.',
+             'EMILY. PRO. MAX.'],
+      cta:'THANK YOU EMILY 🤿', fine:EMILY_FINE},
+  ];
+  // SOLO override: when set to an ad id, ONLY that ad plays (washes off too). Set to null to resume the full rotation.
+  const AD_SOLO='emily';
+  let adPtr=0, adPlays=0, currentAd=null, cardTimer=null, washTimer=null;
+  function pickNextAd(){
+    adPlays++;
+    if(AD_SOLO){ const solo=ADS.find(a=>a.id===AD_SOLO); if(solo) return solo; }   // strictly this ad only
+    if(burnIn && adPlays%4===0) return {kind:'wash', bg:'dark', tune:'wash', dur:9000, fine:''};
+    return ADS[adPtr++ % ADS.length];
+  }
+
+  function showAd(){
+    if(document.hidden) return;   // never play (or blare music) from a background tab
+    playAd(pickNextAd());
+  }
+  function playAd(spec){
+    buildAd();
+    currentAd=spec;
+    const o=adEl();
+    o.classList.remove('bg-white','bg-red','bg-dark'); o.classList.add('bg-'+spec.bg);
+    o.classList.toggle('burnin', !!burnIn);
+    o.dataset.ad=spec.kind;
+    o.classList.add('show');
+    document.getElementById('adFine').textContent = spec.fine||'';
+    cancelAnimationFrame(adRAF); clearInterval(cardTimer); clearInterval(washTimer);
+    if(spec.kind==='deerfx') startDeerFx();
+    else if(spec.kind==='card') startCardAd(spec);
+    else if(spec.kind==='wash') startWash(spec);
+    startAdTimer(spec.dur||AD_DUR);
+    startMusic(spec.tune);
+  }
+  function startDeerFx(){
+    const o=adEl(); o.dataset.scene='intro';
+    document.getElementById('pixDeer').classList.add('bounce');
+    adStart=performance.now();
+    adRAF=requestAnimationFrame(adFrame);
+  }
+  function startCardAd(spec){
+    const host=document.getElementById('adCard');
+    const sprite=host.querySelector('.card-sprite');
+    sprite.style.setProperty('--px', spec.px||'clamp(6px,1.4vw,14px)');
+    buildSprite(sprite, spec.sprite, spec.pal);
+    const brand=host.querySelector('.card-brand'); brand.textContent=spec.brand; brand.style.color=spec.accent||'';
+    host.querySelector('.card-sub').textContent=spec.sub||'';
+    host.querySelector('.card-cta').textContent=spec.cta||'';
+    const lineEl=host.querySelector('.card-line');
+    const rline = v => typeof v==='function' ? v() : v;   // lines may be live (e.g. a player's score)
+    let li=0; lineEl.textContent=rline(spec.lines[0]);
+    cardTimer=setInterval(()=>{ li=(li+1)%spec.lines.length; lineEl.textContent=rline(spec.lines[li]);
+      lineEl.style.animation='none'; void lineEl.offsetWidth; lineEl.style.animation=''; }, 3000);
+  }
+  const WASH_COLORS=['#ffffff','#ff2b2b','#2ecc40','#1e6bff','#000000','#ffd23b','#ff37e6','#00e5e5'];
+  function startWash(){
+    const w=document.getElementById('adWash'); let i=0;
+    const step=()=>{ w.style.background=WASH_COLORS[i%WASH_COLORS.length]; i++; };
+    step(); washTimer=setInterval(step, 500);
+  }
+  function startAdTimer(dur){
+    let left=Math.round(dur/1000); const t=document.getElementById('adTimer');
+    const tick=()=>{ t.textContent='CLOSES IN '+Math.max(0,left)+'S · TAP OR PRESS SPACE TO SKIP'; };
+    tick(); clearInterval(adTick);
+    adTick=setInterval(()=>{ left--; tick(); if(left<=0)clearInterval(adTick); },1000);
+    clearTimeout(adTimeout); adTimeout=setTimeout(hideAd,dur);
+  }
+  function hideAd(){
+    adEl().classList.remove('show');
+    clearTimeout(adTimeout); clearInterval(adTick); clearInterval(cardTimer); clearInterval(washTimer);
+    cancelAnimationFrame(adRAF); stopMusic();
+    if(window.__reloadPending) safeReload();
+  }
   // click / tap anywhere on the ad, or press space, to skip it
   adEl().addEventListener('click',()=>{ if(adShowing()) hideAd(); });
   document.addEventListener('keydown',e=>{ if(adShowing() && (e.code==='Space'||e.key===' ')){ e.preventDefault(); hideAd(); } });
-  function startAds(){ stopAds(); adInterval=setInterval(showAd,AD_EVERY); }   // every 5 min while full-screen
-  function stopAds(){ clearInterval(adInterval); adInterval=null; hideAd(); }
 
-  document.getElementById('fsBtn').addEventListener('click',()=>{
-    if(document.fullscreenElement) document.exitFullscreen?.();
-    else document.documentElement.requestFullscreen?.();
+  // ── 8-bit chiptune soundtrack (Web Audio) — upbeat, plays during the ad ──
+  let actx=null, masterGain=null, musicOn=false, schedTimer=null, nextNote=0, stepN=0;
+  const mfreq=m=>440*Math.pow(2,(m-69)/12);
+  // one chiptune per brand (lead=square, bass=triangle, step=8th-note length)
+  const TUNES={
+    deer:{step:0.15,
+      lead:[72,76,79,76, 77,81,79,77, 74,77,81,79, 79,83,84,81,
+            72,76,79,76, 77,81,79,84, 83,79,76,79, 72,67,72,null],
+      bass:[48,48,55,55, 53,53,52,52, 50,50,57,57, 55,55,55,55,
+            48,48,55,55, 53,53,52,52, 50,50,57,57, 55,53,48,48]},
+    justin:{step:0.16,
+      lead:[69,72,74,76, 74,72,69,null, 67,69,71,72, 71,69,67,null,
+            69,72,76,79, 76,72,69,72, 74,71,69,67, 69,null,69,null],
+      bass:[45,45,45,45, 41,41,41,41, 43,43,43,43, 40,40,40,40,
+            45,45,45,45, 41,41,41,41, 43,43,43,43, 40,40,47,47]},
+    wash:{step:0.11,
+      lead:[84,86,88,89, 91,89,88,86, 84,86,88,89, 91,93,91,89],
+      bass:[48,48,48,48, 50,50,50,50, 52,52,52,52, 55,55,53,53]},
+    anthem:{step:0.2,
+      lead:[67,67,67,72, 71,69,67,69, 71,71,72,74, 72,null,67,null,
+            67,67,69,71, 72,72,74,76, 74,72,71,69, 67,null,60,null],
+      bass:[36,36,43,43, 40,40,36,36, 41,41,43,43, 36,36,36,36,
+            36,36,43,43, 41,41,40,40, 43,43,43,43, 36,36,36,36]},
+    victory:{step:0.13,
+      lead:[72,72,72,76, 79,null,79,null, 76,79,84,null, 84,84,84,null,
+            83,81,79,76, 74,76,79,null, 81,84,88,null, 84,null,84,null],
+      bass:[48,48,48,48, 55,55,55,55, 53,53,52,52, 48,48,48,48,
+            50,50,50,50, 43,43,43,43, 45,45,44,44, 48,48,48,48]},
+  };
+  let curTune=TUNES.deer;
+  function audioCtx(){
+    if(actx===null){ try{ actx=new (window.AudioContext||window.webkitAudioContext)(); }catch(e){ actx=false; } }
+    return actx||null;
+  }
+  let noiseBuf=null;
+  function getNoise(c){
+    if(!noiseBuf){ noiseBuf=c.createBuffer(1,c.sampleRate*0.2,c.sampleRate);
+      const d=noiseBuf.getChannelData(0); for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1; }
+    return noiseBuf;
+  }
+  function tone(freq,start,dur,type,vol){
+    const c=actx; const o=c.createOscillator(), g=c.createGain();
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(0.0001,start); g.gain.linearRampToValueAtTime(vol,start+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,start+dur);
+    o.connect(g).connect(masterGain); o.start(start); o.stop(start+dur+0.02);
+  }
+  function hat(start){
+    const c=actx; const s=c.createBufferSource(), g=c.createGain();
+    s.buffer=getNoise(c); g.gain.setValueAtTime(0.05,start); g.gain.exponentialRampToValueAtTime(0.0001,start+0.04);
+    s.connect(g).connect(masterGain); s.start(start); s.stop(start+0.05);
+  }
+  function scheduler(){
+    const c=actx; if(!c) return;
+    const lead=curTune.lead, bass=curTune.bass, step=curTune.step;
+    while(nextNote < c.currentTime + 0.12){
+      const i=stepN%lead.length;
+      if(lead[i]!=null) tone(mfreq(lead[i]),nextNote,step*0.9,'square',0.14);
+      if(bass[i]!=null) tone(mfreq(bass[i]-12),nextNote,step*0.95,'triangle',0.22);
+      if(i%2===0) hat(nextNote);
+      nextNote+=step; stepN++;
+    }
+  }
+  function startMusic(tune){
+    if(tune) curTune = TUNES[tune] || TUNES.deer;   // no arg → keep current tune (visibility resume)
+    const c=audioCtx(); if(!c) return;
+    if(c.state==='suspended') c.resume().catch(()=>{});
+    if(!masterGain){ masterGain=c.createGain(); masterGain.gain.value=0.16; masterGain.connect(c.destination); }
+    musicOn=true; stepN=0; nextNote=c.currentTime+0.08;
+    clearInterval(schedTimer); schedTimer=setInterval(scheduler,25);
+  }
+  function stopMusic(){ musicOn=false; clearInterval(schedTimer); schedTimer=null; }
+  // never let the ad's music play from a hidden tab; resume it if an ad is still up on return
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden) stopMusic();
+    else if(adShowing()) startMusic();
   });
-  document.addEventListener('fullscreenchange',()=>{
-    const on=!!document.fullscreenElement;
+  const BURNIN_EVERY=40*1000;                 // burn-in mode: an ad every 40s
+  let adEvery=AD_EVERY;
+  function startAds(){ stopAds(); adInterval=setInterval(showAd,adEvery); }
+  function stopAds(){ clearInterval(adInterval); adInterval=null; hideAd(); }
+  // burn-in reduction: run ads often + move content + alternate white/dark; toggled by the ⟳ button
+  function setBurnIn(on){
+    burnIn=on; adEvery = on?BURNIN_EVERY:AD_EVERY;
+    document.getElementById('burnBtn').classList.toggle('on',on);
+    try{ on?localStorage.setItem('bo_burnin','1'):localStorage.removeItem('bo_burnin'); }catch(e){}
+    if(adsAllowed()) startAds();               // restart scheduler at the new cadence
+    if(on && !adShowing() && !document.hidden) showAd();   // kick one off right away
+  }
+
+  // The ad plays on DESKTOP regardless of fullscreen / TV mode (skipped on phone-width layouts).
+  const adsAllowed = ()=> window.matchMedia('(min-width:781px)').matches;
+  function syncAds(){ if(adsAllowed()){ if(!adInterval) startAds(); } else stopAds(); }
+
+  // ── TV mode = the dense fullscreen LAYOUT, decoupled from the browser Fullscreen API so it
+  // survives a reload. Persisted in localStorage; the ad scheduler runs independently. ──
+  function setTvMode(on){
     document.body.classList.toggle('is-fullscreen',on);
-    if(on) startAds(); else stopAds();
+    try{ on ? localStorage.setItem('bo_tv','1') : localStorage.removeItem('bo_tv'); }catch(e){}
+  }
+  function goFullscreen(){
+    document.documentElement.requestFullscreen?.().catch(()=>{});             // best-effort real fullscreen
+    const c=audioCtx(); if(c&&c.state==='suspended') c.resume().catch(()=>{}); // unlock audio for the ad
+  }
+  // the corner button TOGGLES in/out of TV mode + real fullscreen (it stays visible in both)
+  document.getElementById('fsBtn').addEventListener('click',()=>{
+    if(document.body.classList.contains('is-fullscreen')){
+      if(document.fullscreenElement) document.exitFullscreen?.();
+      setTvMode(false);
+    }else{
+      goFullscreen(); setTvMode(true);
+    }
   });
+  // play the ad on demand (click is a gesture, so audio unlocks for it)
+  document.getElementById('adBtn').addEventListener('click',()=>{
+    const c=audioCtx(); if(c&&c.state==='suspended') c.resume().catch(()=>{});
+    showAd();
+  });
+  // toggle burn-in reduction mode
+  document.getElementById('burnBtn').addEventListener('click',()=>{
+    const c=audioCtx(); if(c&&c.state==='suspended') c.resume().catch(()=>{});
+    setBurnIn(!burnIn);
+  });
+
+  // only drop TV mode when REAL fullscreen that we entered is exited (a stray event at load
+  // must not wipe the restored layout / persisted flag)
+  let apiFsActive=false;
+  document.addEventListener('fullscreenchange',()=>{
+    if(document.fullscreenElement) apiFsActive=true;
+    else if(apiFsActive){ apiFsActive=false; setTvMode(false); }
+  });
+  // Esc exits TV mode (covers the reload-restored case where there's no FS API state)
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){ if(document.fullscreenElement) document.exitFullscreen?.(); setTvMode(false); }
+  });
+  // unlock audio on the first user interaction so the ad has sound even when windowed
+  const unlockAudio=()=>{ const c=audioCtx(); if(c&&c.state==='suspended') c.resume().catch(()=>{}); };
+  document.addEventListener('pointerdown',unlockAudio); document.addEventListener('keydown',unlockAudio);
+
+  // ── on load: run ads where allowed, and restore TV mode ──
+  // A reload (incl. the auto-update) drops real fullscreen, and browsers WON'T re-enter it
+  // without a user gesture — so we re-apply the dense LAYOUT immediately and re-enter real
+  // fullscreen on the next tap/key. For a hands-free always-on TV, open ?tv=1 in a browser
+  // already in kiosk / F11 OS-fullscreen (a reload won't exit that).
+  function armFsRecovery(){
+    const h=()=>{ goFullscreen(); document.removeEventListener('pointerdown',h); document.removeEventListener('keydown',h); };
+    document.addEventListener('pointerdown',h); document.addEventListener('keydown',h);
+  }
+  syncAds();
+  window.addEventListener('resize',syncAds);
+  // restore burn-in mode (or enable via ?burnin=1)
+  try{
+    if(/[?&]burnin=1(\b|&|$)/.test(location.search) || localStorage.getItem('bo_burnin')) setBurnIn(true);
+  }catch(e){}
+
+  // hide the cursor after 30s of no mouse/key activity; any movement brings it back
+  let cursorTimer=null;
+  function pokeCursor(){
+    document.body.classList.remove('cursor-hidden');
+    clearTimeout(cursorTimer);
+    cursorTimer=setTimeout(()=>document.body.classList.add('cursor-hidden'),30000);
+  }
+  ['mousemove','pointerdown','keydown','wheel'].forEach(ev=>document.addEventListener(ev,pokeCursor,{passive:true}));
+  pokeCursor();
+  try{
+    const wantTv = /[?&]tv=1(\b|&|$)/.test(location.search) || location.hash==='#tv' || localStorage.getItem('bo_tv');
+    if(wantTv){ setTvMode(true); armFsRecovery(); }
+  }catch(e){}
 </script>
 </body>
 </html>

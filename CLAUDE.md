@@ -38,9 +38,13 @@ The board is a **read-only view of a Google Sheet** via a Google Apps Script web
 which `team` they're on** — read from the API's `redPlayers[]` and `whitePlayers[]`
 arrays (each entry `{name, pts}`).
 
-- **Team totals are computed by SUMMING player scores** in `render()`. The sheet's
-  pre-computed `winnerName`/`winnerPts`/`loserPts` fields are intentionally **ignored**
-  (they were unreliable).
+- **Team totals come DIRECTLY from the Google Sheet** — the `winnerPts`/`loserPts`
+  fields, mapped to red/white by which of `winnerName`/`loserName` contains
+  "red"/"white" (see `sheetTeamTotals()`). This is deliberate: **a team can earn
+  points without crediting any individual player**, so the sheet's team number can be
+  *greater* than the sum of player scores, and we respect the sheet as authoritative.
+  Summing player scores is only a **fallback** when the sheet omits a team number.
+  (Player rows and the per-team MVP still use individual player scores.)
 - An optional **bonus CSV** (`BONUS_CSV_URL`, a published-sheet `gviz` CSV) can add
   points to individual players by normalized name. It degrades gracefully — if the
   sheet is unreachable, base scores are shown.
@@ -83,12 +87,30 @@ when the lead changes hands, and the theme cross-fades. Idle flourishes: bobbing
 pulsing trophies + LEADING tag + winning-board ring, and a gently bobbing canoe. All
 motion is gated behind `prefers-reduced-motion`.
 
-## Full-screen ad (deer.supply)
+## 8-bit ads (deer.supply + Justin's Slippery Throat)
 
-In **full-screen mode only**, a `deer.supply` sponsor ad (fictional GLP-1 weight-loss
-brand) overlays the screen **every 5 minutes for 30 seconds** (`AD_EVERY` / `AD_DUR`),
-with a live countdown. The scheduler starts on `fullscreenchange` (entering FS) and is
-cleared on exit, so the ad never shows in windowed/responsive mode.
+A rotating catalog of **fictional** 8-bit sponsor ads (entertainment only — see the
+disclaimers in each ad's copy) overlays the screen **every 5 minutes for 30 seconds**
+(`AD_EVERY` / `AD_DUR`). Ads play on **desktop regardless of fullscreen** and **only
+while the tab is visible** (`syncAds()` at desktop width; `showAd()` bails if
+`document.hidden`). All are skippable by tap/space, auto-close, and have a CRT
+scanline/vignette overlay and a Web-Audio **chiptune** (one tune per brand in `TUNES`).
+
+The catalog (`ADS`) rotates:
+- **deer.supply "video"** (`kind:'deerfx'`, dark bg) — the original 4-scene `rAF`
+  timeline: 8-bit deer intro → an 8-bit person slims from high BMI to healthy (`@property
+  --belly` inflates/deflates head+belly+legs) → `24% BODY WEIGHT GONE*` crowd → CTA. Numbers
+  are a dramatization of published retatrutide (GLP-1/GIP/glucagon) trial figures.
+- **card ads** (`kind:'card'`) — a generic renderer: pixel sprite (deer or the `BOTTLE`
+  sprite for Justin's) + brand + a cycling tagline + CTA, gently **drifting** for burn-in.
+  Variants include deer.supply on a **white** bg and **Justin's Slippery Throat™** on both
+  dark and white bgs. Backgrounds are `.ad.bg-dark` / `.ad.bg-white` / `.ad.bg-red`.
+
+**Burn-in reduction** (the ⟳ button next to ▶, persisted in `localStorage['bo_burnin']`,
+also `?burnin=1`): drops the cadence to every 40s (`BURNIN_EVERY`), speeds up the content
+drift, and injects a **pixel-refresh wash** (`kind:'wash'`) every 4th ad that cycles solid
+full-screen colours with a sweeping band — alternating bright/dark full-screen content is
+what actually exercises the panel and evens out wear.
 
 ## Running locally
 
