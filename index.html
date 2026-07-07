@@ -350,6 +350,19 @@
   .ad-wash{position:absolute;inset:0;z-index:2;display:none;align-items:center;justify-content:center;background:#fff}
   .ad[data-ad="wash"] .ad-wash{display:flex}
 
+  /* party-photo interlude — 2-3 random Assets photos as tilted 8-bit polaroids */
+  .ad-photos{position:absolute;inset:0;z-index:1;display:none;align-items:center;justify-content:center;
+    gap:clamp(14px,2.6vw,38px);padding:clamp(58px,9vh,108px) 4vw clamp(70px,11vh,120px)}
+  .ad[data-ad="photos"] .ad-photos{display:flex}
+  .ad-photos .snap{background:#fff;border:5px solid var(--dark);box-shadow:8px 8px 0 rgba(0,0,0,.45);
+    padding:clamp(8px,1vw,14px) clamp(8px,1vw,14px) clamp(24px,3vw,44px);
+    transform:rotate(var(--tilt,0deg));animation:snapin .55s cubic-bezier(.22,1,.36,1) both}
+  .ad-photos .snap img{display:block;width:clamp(180px,25vw,460px);height:clamp(220px,31vw,560px);
+    max-height:58vh;object-fit:cover;border:3px solid var(--dark);background:#eee;image-rendering:auto}
+  @keyframes snapin{from{opacity:0;transform:rotate(var(--tilt,0deg)) scale(.82) translateY(26px)}
+    to{opacity:1;transform:rotate(var(--tilt,0deg)) scale(1) translateY(0)}}
+  @media (prefers-reduced-motion:reduce){.ad-photos .snap{animation:none}}
+
   /* generic card ad — sprite + brand + cycling tagline, gently DRIFTING for burn-in */
   .card-inner{display:flex;flex-direction:column;align-items:center;text-align:center;
     gap:clamp(8px,2vh,26px);animation:adDrift 11s ease-in-out infinite}
@@ -454,7 +467,7 @@
     <div class="topbar">
       <div class="toolbtns">
         <button class="iconbtn burnbtn" id="burnBtn" title="Reduce burn-in (run ads often)" aria-label="Reduce burn-in">⟳</button>
-        <button class="iconbtn adbtn" id="adBtn" title="Play ad now" aria-label="Play ad now">▶</button>
+        <button class="iconbtn adbtn" id="adBtn" title="Show party photos now" aria-label="Show party photos now">▶</button>
         <button class="iconbtn fsbtn" id="fsBtn" title="Full screen" aria-label="Full screen">⛶</button>
       </div>
       <div class="titles">
@@ -559,6 +572,9 @@
 
     <!-- pixel-refresh wash (burn-in mode) -->
     <div class="ad-wash" id="adWash"><div class="wash-label">PIXEL REFRESH</div></div>
+
+    <!-- party-photo interlude (random Assets photos; replaces the ad rotation) -->
+    <div class="ad-photos" id="adPhotos"></div>
 
     <div class="ad-fine" id="adFine"></div>
     <div class="ad-timer" id="adTimer">CLOSES IN 30S · TAP OR PRESS SPACE TO SKIP</div>
@@ -1255,13 +1271,17 @@
       cta:'THANK YOU EMILY 🤿', fine:EMILY_FINE},
   ];
   // SOLO override: when set to an ad id, ONLY that ad plays (washes off too). Set to null to resume the full rotation.
-  const AD_SOLO='emily';
+  const AD_SOLO='emily';   // dormant while the photo interlude below is active
   let adPtr=0, adPlays=0, currentAd=null, cardTimer=null, washTimer=null;
+  // The overlay now shows PARTY PHOTOS instead of ads: every cycle deals 2-3 random
+  // photos from Assets/ (reshuffled every few seconds). The ADS catalog + AD_SOLO
+  // above stay dormant — swap the return line below for the commented one to bring
+  // the ads back. Burn-in washes still run in burn-in mode.
   function pickNextAd(){
     adPlays++;
-    if(AD_SOLO){ const solo=ADS.find(a=>a.id===AD_SOLO); if(solo) return solo; }   // strictly this ad only
     if(burnIn && adPlays%4===0) return {kind:'wash', bg:'dark', tune:'wash', dur:9000, fine:''};
-    return ADS[adPtr++ % ADS.length];
+    return {kind:'photos', bg:'dark', tune:'anthem', fine:''};
+    // return AD_SOLO && ADS.find(a=>a.id===AD_SOLO) || ADS[adPtr++ % ADS.length];   // ← ad rotation
   }
 
   function showAd(){
@@ -1276,11 +1296,13 @@
     o.classList.toggle('burnin', !!burnIn);
     o.dataset.ad=spec.kind;
     o.classList.add('show');
+    o.querySelector('.ad-tag').textContent = spec.kind==='photos' ? '📸 PARTY CAM' : 'ADVERTISEMENT';
     document.getElementById('adFine').textContent = spec.fine||'';
     cancelAnimationFrame(adRAF); clearInterval(cardTimer); clearInterval(washTimer);
     if(spec.kind==='deerfx') startDeerFx();
     else if(spec.kind==='card') startCardAd(spec);
     else if(spec.kind==='wash') startWash(spec);
+    else if(spec.kind==='photos') startPhotoInterlude();
     startAdTimer(spec.dur||AD_DUR);
     startMusic(spec.tune);
   }
@@ -1304,6 +1326,20 @@
     cardTimer=setInterval(()=>{ li=(li+1)%spec.lines.length; lineEl.textContent=rline(spec.lines[li]);
       lineEl.style.animation='none'; void lineEl.offsetWidth; lineEl.style.animation=''; }, 3000);
   }
+  // party-photo interlude: deal 2-3 random photos, reshuffle every few seconds
+  // (reuses cardTimer so playAd/hideAd clean it up like any other rotation)
+  function startPhotoInterlude(){
+    const host=document.getElementById('adPhotos');
+    const deal=()=>{
+      const picks=[...PHOTOS].sort(()=>Math.random()-.5).slice(0, 2+(Math.random()<.5?1:0));
+      host.innerHTML=picks.map((f,i)=>
+        '<div class="snap" style="--tilt:'+(Math.random()*7-3.5).toFixed(1)+'deg;animation-delay:'+(i*90)+'ms">'
+        +'<img src="Assets/'+encodeURIComponent(f)+'" alt=""></div>').join('');
+    };
+    deal();
+    cardTimer=setInterval(deal, 8000);
+  }
+
   const WASH_COLORS=['#ffffff','#ff2b2b','#2ecc40','#1e6bff','#000000','#ffd23b','#ff37e6','#00e5e5'];
   function startWash(){
     const w=document.getElementById('adWash'); let i=0;
