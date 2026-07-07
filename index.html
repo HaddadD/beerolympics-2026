@@ -43,6 +43,7 @@
   body.cursor-hidden, body.cursor-hidden *{cursor:none!important}
   body{
     position:relative;min-height:100vh;
+    display:flex;flex-direction:column;
     font-family:'Press Start 2P','Courier New',monospace;
     background:var(--page-bg);color:var(--ink);transition:background .55s ease;
     overflow-x:hidden;-webkit-font-smoothing:none;image-rendering:pixelated;
@@ -68,10 +69,65 @@
 
   /* ── app shell ── */
   .app{
-    position:relative;z-index:5;max-width:1860px;margin:0 auto;min-height:100vh;
+    position:relative;z-index:5;max-width:1860px;width:100%;margin:0 auto;flex:1;min-height:0;
     display:flex;flex-direction:column;gap:clamp(10px,1.4vh,18px);
     padding:clamp(18px,2.6vw,42px) clamp(16px,2.6vw,48px) var(--lane);
   }
+
+  /* ── shared site header (identical markup + CSS on all three pages) ── */
+  .site-header{
+    position:relative;z-index:60;width:100%;flex-shrink:0;
+    background:#CC0000;border-bottom:6px solid #111;
+    text-align:center;
+    padding:clamp(14px,2vh,22px) clamp(48px,5vw,72px) clamp(12px,1.8vh,18px);
+  }
+  .site-header h1{
+    margin:0;
+    font-family:'Press Start 2P',monospace;
+    font-size:clamp(15px,2.6vw,30px);
+    color:#fff;text-shadow:3px 3px 0 rgba(0,0,0,.45);
+    letter-spacing:2px;line-height:1.3;
+  }
+  .site-header .sitenav{
+    display:flex;justify-content:center;flex-wrap:wrap;
+    gap:clamp(8px,1vw,14px);
+    margin-top:clamp(10px,1.6vh,16px);
+  }
+  .site-header .sitenav a{
+    font-family:'Press Start 2P',monospace;
+    font-size:clamp(8px,1vw,12px);letter-spacing:1px;line-height:1;
+    text-decoration:none;color:#111;background:#fff;
+    border:3px solid #111;box-shadow:3px 3px 0 rgba(0,0,0,.35);
+    padding:clamp(8px,1.1vh,12px) clamp(10px,1.2vw,16px);
+  }
+  .site-header .sitenav a:hover{background:#ffd700}
+  .site-header .sitenav a:active{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(0,0,0,.35)}
+  .site-header .sitenav a.is-active{background:#111;color:#fff;pointer-events:none}
+  .site-header .fsbtn{
+    position:absolute;top:clamp(12px,1.8vh,20px);right:clamp(10px,1.4vw,22px);
+    display:flex;align-items:center;justify-content:center;
+    width:clamp(34px,3vw,44px);height:clamp(34px,3vw,44px);
+    font-family:'Press Start 2P',monospace;font-size:clamp(13px,1.3vw,18px);line-height:1;
+    cursor:pointer;color:#fff;background:#111;border:3px solid #111;box-shadow:3px 3px 0 rgba(0,0,0,.35);
+  }
+  .site-header .fsbtn:hover{background:#ffd700;color:#111}
+  .site-header .fsbtn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 rgba(0,0,0,.35)}
+
+  /* ── photo collage popup (click a player row) ── */
+  .row{cursor:pointer}
+  .row:hover .pname{text-decoration:underline}
+  .photo-overlay{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.78);display:none;align-items:center;justify-content:center;padding:clamp(10px,3vw,34px)}
+  .photo-overlay.show{display:flex}
+  .photo-box{width:100%;max-width:1100px;max-height:88vh;display:flex;flex-direction:column;background:var(--cream);border:6px solid var(--dark);box-shadow:10px 10px 0 rgba(0,0,0,.5)}
+  .photo-head{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--red);color:var(--white);padding:clamp(10px,1.6vh,16px) 14px;border-bottom:5px solid var(--dark);flex-shrink:0}
+  .photo-title{font-size:clamp(10px,1.7vw,17px);letter-spacing:1px;line-height:1.3}
+  .photo-close{display:flex;align-items:center;justify-content:center;width:clamp(32px,3vw,42px);height:clamp(32px,3vw,42px);flex-shrink:0;font-family:inherit;font-size:clamp(12px,1.3vw,17px);line-height:1;cursor:pointer;color:#fff;background:#111;border:3px solid #111;box-shadow:3px 3px 0 rgba(0,0,0,.35)}
+  .photo-close:hover{background:var(--gold);color:#111}
+  .photo-grid{overflow-y:auto;padding:clamp(10px,1.6vw,18px);column-count:3;column-gap:clamp(8px,1.2vw,14px)}
+  .photo-grid img{width:100%;display:block;margin-bottom:clamp(8px,1.2vw,14px);border:4px solid var(--dark);box-shadow:4px 4px 0 rgba(0,0,0,.25);background:#fff;break-inside:avoid}
+  .photo-empty{column-span:all;text-align:center;font-size:clamp(9px,1.2vw,13px);color:rgba(0,0,0,.5);padding:34px 10px;line-height:1.8}
+  @media (max-width:860px){.photo-grid{column-count:2}}
+  @media (max-width:520px){.photo-grid{column-count:1}}
 
   /* ── header ── */
   .topbar{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:clamp(6px,1vh,12px)}
@@ -383,6 +439,16 @@
   </div>
   <div class="frame"></div>
 
+  <!-- SHARED SITE HEADER (matches the other pages; the ⛶ lives in the toolbtns below on this page) -->
+  <header class="site-header">
+    <h1>🍁 2026 CANADA DAY BEEROLYMPICS 🍁</h1>
+    <nav class="sitenav">
+      <a class="is-active" href="index.html" aria-current="page">🏆 LEADERBOARD</a>
+      <a href="beer-pong-bracket_6.html">🍺 BEER PONG</a>
+      <a href="beerolympics-superlatives.html">🎮 SIDEQUEST AWARDS</a>
+    </nav>
+  </header>
+
   <div class="app">
     <!-- HEADER -->
     <div class="topbar">
@@ -392,7 +458,6 @@
         <button class="iconbtn fsbtn" id="fsBtn" title="Full screen" aria-label="Full screen">⛶</button>
       </div>
       <div class="titles">
-        <h1>2026 CANADA DAY BEEROLYMPICS</h1>
         <div class="sub">🍁 LIVE TEAM LEADERBOARD 🍁</div>
       </div>
     </div>
@@ -499,11 +564,24 @@
     <div class="ad-timer" id="adTimer">CLOSES IN 30S · TAP OR PRESS SPACE TO SKIP</div>
   </div>
 
+  <!-- PHOTO COLLAGE POPUP (click a player row) -->
+  <div class="photo-overlay" id="photoOverlay" role="dialog" aria-modal="true">
+    <div class="photo-box">
+      <div class="photo-head">
+        <div class="photo-title" id="photoTitle">📸</div>
+        <button class="photo-close" id="photoClose" title="Close" aria-label="Close">✕</button>
+      </div>
+      <div class="photo-grid" id="photoGrid"></div>
+    </div>
+  </div>
+
 <script>
   // ─────────────────────────────────────────────────────────────
-  //  Data: we only care about each player's NAME, SCORE and TEAM.
-  //  Team totals are computed by SUMMING player scores (the
-  //  pre-computed winner/loser totals from the sheet are ignored).
+  //  Data: player NAME, SCORE and TEAM come from redPlayers[] /
+  //  whitePlayers[]. TEAM TOTALS come from the sheet's Dashboard
+  //  View (D6 = Red, D8 = White), which the Apps Script exposes as
+  //  the winner*/loser* fields. If those fields are missing we fall
+  //  back to summing the player rows.
   // ─────────────────────────────────────────────────────────────
   const API_URL    = 'https://script.google.com/macros/s/AKfycbzprLfwc4BJmYeu5U0vWdyu4xKVOTztibpGEqD9wShmVA1SthYsLCJC2kQOh1MyZ1B0/exec';
   const BONUS_CSV_URL = 'https://docs.google.com/spreadsheets/d/10ggx9WjHPnFeTcFncbyJL3tdeMH61cz6vq_4Yea--sA/gviz/tq?tqx=out:csv&headers=0&gid=0';
@@ -515,6 +593,10 @@
   }
   const num = v => { const m=String(v==null?'':v).match(/-?\d+(\.\d+)?/); return m?parseFloat(m[0]):0; };
   const normName = n => String(n==null?'':n).trim().replace(/\s+/g,' ').toUpperCase();
+  // display renames — applied to sheet data everywhere a name is shown or matched.
+  // No-ops once the name is fixed in the Google Sheet itself.
+  const NAME_ALIASES={'LIZ':'Shannon'};
+  const aliasName = n => NAME_ALIASES[normName(n)] || String(n==null?'':n).trim();
   function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
   // ── bonus sheet (optional, adds to individual player scores) ──
@@ -529,7 +611,7 @@
     const map={};
     String(text).split(/\r?\n/).forEach(line=>{
       if(!line.trim())return;
-      const cols=parseCsvLine(line);const name=normName(cols[0]);const n=num(cols[1]);
+      const cols=parseCsvLine(line);const name=normName(aliasName(cols[0]));const n=num(cols[1]);
       if(!name||!isFinite(n))return; map[name]=(map[name]||0)+n;
     });
     return map;
@@ -549,23 +631,34 @@
   const PLAYER_SCORE_OVERRIDES = { 'EMILY': 1000 };
   const TEAM_TOTAL_OVERRIDES   = { red: 1106 };
 
+  // rows named after a team ("Red Team", "Team White", …) are team-level points,
+  // not players — they're added to that team's total instead of the player list
+  function teamAlias(name){
+    const n=normName(name);
+    if(n==='RED TEAM'||n==='TEAM RED') return 'red';
+    if(n==='WHITE TEAM'||n==='TEAM WHITE') return 'white';
+    return null;
+  }
+
   // ── shape the raw API payload into a sorted per-team player list ──
   function teamPlayers(arr,team){
     return (arr||[])
       .map(p=>{
-        const name=String(p&&p.name!=null?p.name:'').trim();
+        const name=aliasName(p&&p.name);
         const ov=PLAYER_SCORE_OVERRIDES[normName(name)];
         return {name,team,score: ov!=null ? ov : num(p&&p.pts)+(bonusMap[normName(name)]||0)};
       })
-      .filter(p=>p.name)
+      .filter(p=>p.name && !teamAlias(p.name))
       .sort((a,b)=>b.score-a.score||a.name.localeCompare(b.name));
   }
 
-  // ── TEAM TOTALS come DIRECTLY from the Google Sheet (winnerPts/loserPts) ──
+  // ── TEAM TOTALS come DIRECTLY from the Google Sheet (Dashboard View: D6 = Red,
+  // D8 = White, exposed as winnerPts/loserPts) ──
   // A team can earn points without crediting any individual player, so the sheet's
   // team number can be GREATER than the sum of player scores. The winner/loser
   // fields are mapped to red/white by which team name contains "red"/"white".
-  // Player-score sums are used only as a fallback when the sheet omits a number.
+  // Player-score sums (plus team-level rows) are only a fallback when the sheet
+  // omits a number.
   function sheetTeamTotals(data,sumRed,sumWhite){
     const wName=String(data&&data.winnerName!=null?data.winnerName:'').toLowerCase();
     const lName=String(data&&data.loserName !=null?data.loserName :'').toLowerCase();
@@ -576,6 +669,18 @@
     if(wName.includes('red')||lName.includes('white')){ red=wPts; white=lPts; }
     else if(wName.includes('white')||lName.includes('red')){ white=wPts; red=lPts; }
     return { red: red!=null?red:sumRed, white: white!=null?white:sumWhite };
+  }
+
+  // team-level points from both sources: main-sheet rows named after a team,
+  // plus bonus-sheet rows named after a team (each counted exactly once)
+  // — only used by the fallback path when the sheet totals are unavailable
+  function teamBonusPoints(data){
+    const b={red:0,white:0};
+    [].concat(data.redPlayers||[],data.whitePlayers||[]).forEach(p=>{
+      const t=teamAlias(p&&p.name); if(t) b[t]+=num(p&&p.pts);
+    });
+    Object.keys(bonusMap).forEach(k=>{ const t=teamAlias(k); if(t) b[t]+=bonusMap[k]; });
+    return b;
   }
 
   // remembered state between refreshes (for change/rank animations)
@@ -618,6 +723,8 @@
     el.innerHTML='<span class="rank"></span>'
       +'<span class="who"><span class="pname"></span><span class="trophy" hidden>🏆</span><span class="badge" hidden></span></span>'
       +'<span class="score"></span>';
+    el.title='📸 View photos';
+    el.addEventListener('click',()=>openPhotos(name));
     return el;
   }
   function updateRow(el,p,rank,isMVP,tie,team){
@@ -705,9 +812,10 @@
     const red   = teamPlayers(data.redPlayers,'red');
     const white = teamPlayers(data.whitePlayers,'white');
     lastTeams = {red, white};   // expose live scores to the ads
+    const teamBonus = teamBonusPoints(data);       // team-level rows (fallback sums only)
     const sum = arr => arr.reduce((t,p)=>t+p.score,0);
-    // team totals are the sheet's authoritative numbers (fallback: sum of players)
-    const totals = sheetTeamTotals(data,sum(red),sum(white));
+    // team totals are the sheet's authoritative numbers (fallback: players + team rows)
+    const totals = sheetTeamTotals(data,sum(red)+teamBonus.red,sum(white)+teamBonus.white);
     // manual overrides win over the sheet
     const redTotal   = TEAM_TOTAL_OVERRIDES.red   != null ? TEAM_TOTAL_OVERRIDES.red   : totals.red;
     const whiteTotal = TEAM_TOTAL_OVERRIDES.white != null ? TEAM_TOTAL_OVERRIDES.white : totals.white;
@@ -739,6 +847,82 @@
     if(prevLeader!==null && prevLeader!==leader && !reduceMotion){ leadBar.classList.remove('pop'); void leadBar.offsetWidth; leadBar.classList.add('pop'); }
     prevLeader=leader;
   }
+
+  // ── photo collage popup ──
+  // Static manifest of Assets/ — GitHub Pages can't list a folder, so keep this
+  // in sync when photos are added. A player's popup shows every file whose name
+  // contains their name (case-insensitive, anywhere in the filename).
+  const PHOTOS=[
+    'Aaron_Ashlynn.jpg',
+    'Aaron_Dan.jpg',
+    'Aaron_Dan_3.jpg',
+    'Arturo_Dan.jpg',
+    'Arturo_Karim.jpg',
+    'Ashlynn_Aaron.jpg',
+    'Ashlynn_Aaron_2.jpg',
+    'Ashlynn_Aaron_3.jpg',
+    'Brian_Justin_Matt_Karim.jpg',
+    'Brian_Karim.jpg',
+    'Brian_Karim_2.jpg',
+    'Dan_Aaron.jpg',
+    'Dan_Arturo.jpg',
+    'Dan_Arturo_2.jpg',
+    'Dan_Maddie_Brian_Aaron.jpg',
+    'Dan_Yavuz.jpg',
+    'Emily_Justin.jpg',
+    'Justin_Matt.jpg',
+    'Justin_Matt_2.jpg',
+    'Justin_Steph_Brian_Yavuz.jpg',
+    'Justin_Vic.jpg',
+    'Justin_Vic_2.jpg',
+    'Karim.jpg',
+    'Karim_Brian.jpg',
+    'Karim_Dan_Ren_Matt.jpg',
+    'Karim_Justin_Aaron_Matt.jpg',
+    'Karim_Justin_Yavuz_Wilson.jpg',
+    'Maddie_Karim_Arturo_Wilson.jpg',
+    'Maddie_Ren_Dan_Arturo.jpg',
+    'Maddie_Vic.jpg',
+    'Matt_Justin.jpg',
+    'Ren_Dan.jpg',
+    'Ren_Karim.jpg',
+    'Ren_Karim_2.jpg',
+    'Rusiru_Aaron_Brian_Maddie.jpg',
+    'Rusiru_Arturo.jpg',
+    'Rusiru_Karim_Brian_Matt.jpg',
+    'Rusiru_Matt_Justin_Ren.jpg',
+    'Rusiru_Shannon.jpg',
+    'Rusiru_Vic_Emily_Arturo.jpg',
+    'Rusiru_Yavuz.jpg',
+    'Rusiru_Yavuz_2.jpg',
+    'Shannon_Dan.jpg',
+    'Steph_Justin_Brian_Wilson.jpg',
+    'Steph_Yavuz.jpg',
+    'Vic_Ashlynn.jpg',
+    'Vic_Justin.jpg',
+    'Wilson_Aaron_Justin_Matt.jpg',
+    'Wilson_Dan.jpg',
+    'Yavuz_Rusiru.jpg',
+    'Yavuz_Rusiru_2.jpg',
+    'Yavuz_Steph.jpg'
+  ];
+  const photoOverlay=document.getElementById('photoOverlay');
+  function openPhotos(name){
+    const matches=PHOTOS.filter(f=>normName(f).indexOf(normName(name))>-1);
+    document.getElementById('photoTitle').textContent='📸 '+name.toUpperCase()+(matches.length?' · '+matches.length+' PHOTO'+(matches.length===1?'':'S'):'');
+    document.getElementById('photoGrid').innerHTML = matches.length
+      ? matches.map(f=>'<img src="Assets/'+encodeURIComponent(f)+'" alt="'+esc(f)+'" loading="lazy">').join('')
+      : '<div class="photo-empty">NO PHOTOS OF '+esc(name.toUpperCase())+' YET 📷<br>GET IN FRONT OF A CAMERA!</div>';
+    photoOverlay.classList.add('show');
+    document.body.style.overflow='hidden';
+  }
+  function closePhotos(){
+    photoOverlay.classList.remove('show');
+    document.body.style.overflow='';
+  }
+  photoOverlay.addEventListener('click',e=>{ if(e.target===photoOverlay) closePhotos(); });
+  document.getElementById('photoClose').addEventListener('click',closePhotos);
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&photoOverlay.classList.contains('show')) closePhotos(); });
 
   // ── fetch loop (fires immediately on load; refreshes every 30s) ──
   async function refresh(){
@@ -1311,6 +1495,37 @@
     const wantTv = /[?&]tv=1(\b|&|$)/.test(location.search) || location.hash==='#tv' || localStorage.getItem('bo_tv');
     if(wantTv){ setTvMode(true); armFsRecovery(); }
   }catch(e){}
+
+  // ── keep fullscreen across tab switches ──
+  // A real navigation drops out of fullscreen, so while fullscreen the tabs swap
+  // pages inside a full-viewport iframe instead. Pages loaded in that iframe
+  // (EMBEDDED) navigate normally — the top document stays fullscreen throughout.
+  const EMBEDDED = window.self!==window.top;
+  if(EMBEDDED){
+    // already fullscreen via the shell — hide the corner controls; ads keep their
+    // own schedule (syncAds above runs regardless of fullscreen)
+    const tb=document.querySelector('.toolbtns'); if(tb) tb.style.display='none';
+  }
+  document.querySelectorAll('.site-header .sitenav a').forEach(a=>{
+    a.addEventListener('click',e=>{
+      if(EMBEDDED || !document.fullscreenElement) return;
+      e.preventDefault();
+      let f=document.getElementById('fsFrame');
+      if(!f){
+        f=document.createElement('iframe'); f.id='fsFrame'; f.allowFullscreen=true;
+        f.style.cssText='position:fixed;inset:0;width:100vw;height:100vh;border:0;z-index:2147483000;background:#000';
+        document.body.appendChild(f);
+      }
+      f.src=a.getAttribute('href');
+    });
+  });
+  // leaving fullscreen: land for real on the page currently shown in the iframe
+  document.addEventListener('fullscreenchange',()=>{
+    if(!document.fullscreenElement){
+      const f=document.getElementById('fsFrame');
+      if(f){ try{ window.location.href=f.contentWindow.location.href; }catch(_){ f.remove(); } }
+    }
+  });
 </script>
 </body>
 </html>

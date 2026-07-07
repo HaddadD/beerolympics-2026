@@ -39,18 +39,40 @@ which `team` they're on** — read from the API's `redPlayers[]` and `whitePlaye
 arrays (each entry `{name, pts}`).
 
 - **Team totals come DIRECTLY from the Google Sheet** — the `winnerPts`/`loserPts`
-  fields, mapped to red/white by which of `winnerName`/`loserName` contains
-  "red"/"white" (see `sheetTeamTotals()`). This is deliberate: **a team can earn
-  points without crediting any individual player**, so the sheet's team number can be
-  *greater* than the sum of player scores, and we respect the sheet as authoritative.
-  Summing player scores is only a **fallback** when the sheet omits a team number.
-  (Player rows and the per-team MVP still use individual player scores.)
+  fields (fed by the **Dashboard View** sheet: **D6 = Red, D8 = White**), mapped to
+  red/white by which of `winnerName`/`loserName` contains "red"/"white" (see
+  `sheetTeamTotals()`). This is deliberate: **a team can earn points without
+  crediting any individual player**, so the sheet's team number can be *greater* than
+  the sum of player scores, and we respect the sheet as authoritative. Summing player
+  scores is only a **fallback** when the sheet omits a team number. (Player rows and
+  the per-team MVP still use individual player scores.)
+- **Manual overrides trump everything:** `PLAYER_SCORE_OVERRIDES` /
+  `TEAM_TOTAL_OVERRIDES` in `index.html` pin values regardless of the sheet
+  (currently Emily = 1000, red = 1106 — matching the sheet today). Remove the entries
+  to go back to live sheet data.
+- **Name aliases:** `NAME_ALIASES` renames players everywhere they're shown or
+  matched (currently `LIZ → Shannon`); it no-ops once the sheet itself is fixed.
+- **Team-level rows (fallback path only):** a row named `Red Team` / `Team Red` /
+  `White Team` / `Team White` (case/whitespace-insensitive) in either the players
+  arrays or the bonus CSV is treated as points for the whole team — silently added to
+  that team's fallback total (`teamBonusPoints()`), never rendered as a player row or
+  MVP.
 - An optional **bonus CSV** (`BONUS_CSV_URL`, a published-sheet `gviz` CSV) can add
   points to individual players by normalized name. It degrades gracefully — if the
   sheet is unreachable, base scores are shown.
 - Scores are parsed leniently (`"18 pts"` → `18`).
 
 If scores need to change, edit the **Google Sheet / Apps Script**, not this repo.
+
+## Photo collage popup
+
+Clicking a player row on the leaderboard opens a popup collage of every photo in
+`Assets/` whose **filename contains that player's name** (case-insensitive, anywhere
+in the name — files are named like `Dan_Maddie_Brian_Aaron.jpg`). GitHub Pages can't
+list a directory, so the filenames live in a **static `PHOTOS` manifest** in
+`index.html` — **when photos are added/removed in `Assets/`, update that array**
+(`ls *.jpg` in Assets). Browsers can't render HEIC; convert any to JPG first
+(`sips -s format jpeg X.HEIC --out X.jpg`).
 
 ## Leaderboard logic
 
